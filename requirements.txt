@@ -1,0 +1,22 @@
+# Core ML/AI libraries
+unsloth
+transformers>=4.30.0
+accelerate
+datasets
+trl
+peft
+bitsandbytes
+torch
+
+# Data processing
+pandas
+scikit-learn
+scipy
+
+# Web scraping and API utilities
+beautifulsoup4
+requests
+
+# Jupyter notebook support
+jupyter
+notebook
