@@ -15,9 +15,9 @@ import time
 import sys
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from utils.logging import (
+from src.utils.logging import (
     AstrabotLogger,
     get_logger,
     log_performance,

@@ -24,7 +24,7 @@ import threading
 
 # Import configuration
 try:
-    from config import config
+    from .config import config
 except ImportError:
     config = None
 
