@@ -7,14 +7,14 @@ import sys
 from pathlib import Path
 
 # Add current directory to Python path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from conversation_utilities import (
+from src.extractors.twitter_extractor import (
     extract_tweet_text,
     describe_tweet_images_with_context,
     process_message_with_structured_content
 )
-from structured_schemas import TweetContent, ImageDescription, EnhancedMessage
+from src.models.schemas import TweetContent, ImageDescription, EnhancedMessage
 from datetime import datetime
 import json
 

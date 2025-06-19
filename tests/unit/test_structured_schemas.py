@@ -9,9 +9,9 @@ import sys
 import os
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from structured_schemas import (
+from src.models.schemas import (
     EmotionalTone, Sentiment, ImageDescription, TweetContent,
     ImageWithContext, BatchImageDescription, EnhancedMessage,
     generate_json_schema

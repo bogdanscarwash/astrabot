@@ -10,7 +10,7 @@ from typing import Optional, Any
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-PROJECT_ROOT = Path(__file__).parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent  # Navigate from src/utils/ to project root
 ENV_FILE = PROJECT_ROOT / '.env'
 
 # Load .env if it exists

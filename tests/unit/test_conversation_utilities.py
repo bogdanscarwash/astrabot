@@ -10,16 +10,16 @@ import sys
 import os
 
 # Add parent directory to path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from conversation_utilities import (
+from src.extractors.twitter_extractor import (
     extract_tweet_text,
     inject_tweet_context,
     extract_tweet_images,
     process_message_with_twitter_content,
     process_message_with_structured_content
 )
-from structured_schemas import TweetContent, ImageDescription, EnhancedMessage
+from src.models.schemas import TweetContent, ImageDescription, EnhancedMessage
 
 
 class TestTweetExtraction(unittest.TestCase):
