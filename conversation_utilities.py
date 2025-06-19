@@ -30,6 +30,19 @@ from structured_schemas import (
     generate_json_schema, IMAGE_DESCRIPTION_SCHEMA
 )
 
+# Import configuration
+try:
+    from config import config
+except ImportError:
+    # Fallback if config.py is not available
+    class Config:
+        OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+        ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+        ENABLE_IMAGE_PROCESSING = True
+        ENABLE_BATCH_PROCESSING = True
+        MAX_BATCH_SIZE = 10
+    config = Config()
+
 
 def extract_tweet_text(url: str, return_structured: bool = False) -> Optional[Dict[str, str] | TweetContent]:
     """
@@ -267,12 +280,12 @@ def describe_tweet_images(image_urls: List[str], api_endpoint: str, api_key: Opt
     if not image_urls:
         return descriptions
     
-    # Get API key from environment if not provided
+    # Get API key from config if not provided
     if not api_key:
         if api_endpoint == 'openai':
-            api_key = os.environ.get('OPENAI_API_KEY')
+            api_key = config.OPENAI_API_KEY
         elif api_endpoint == 'anthropic':
-            api_key = os.environ.get('ANTHROPIC_API_KEY')
+            api_key = config.ANTHROPIC_API_KEY
     
     # Batch process with OpenAI if enabled and multiple images
     if batch_process and api_endpoint == 'openai' and len(image_urls) > 1 and api_key:
@@ -341,9 +354,9 @@ def describe_tweet_images_with_context(
     if not images_with_context:
         return []
     
-    # Get API key from environment if not provided
+    # Get API key from config if not provided
     if not api_key:
-        api_key = os.environ.get('OPENAI_API_KEY')
+        api_key = config.OPENAI_API_KEY
     
     if not api_key:
         raise ValueError("OpenAI API key required for image description")

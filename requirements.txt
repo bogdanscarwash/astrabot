@@ -17,6 +17,10 @@ scipy
 beautifulsoup4
 requests
 
+# Configuration and environment
+python-dotenv
+pydantic
+
 # Jupyter notebook support
 jupyter
 notebook
