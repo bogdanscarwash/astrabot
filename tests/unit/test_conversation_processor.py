@@ -19,7 +19,7 @@ from src.core.conversation_processor import (
     process_message_with_twitter_content,
     process_message_with_structured_content
 )
-from structured_schemas import TweetContent, ImageDescription, EnhancedMessage
+from src.models.schemas import TweetContent, ImageDescription, EnhancedMessage
 
 
 class TestTweetExtraction(unittest.TestCase):

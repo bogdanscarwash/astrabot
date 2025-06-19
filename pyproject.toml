@@ -7,10 +7,10 @@ name = "astrabot"
 version = "0.1.0"
 description = "Personal AI fine-tuning using Signal conversation history"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = "3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "persephone raskova", email = "icegoddess69420@proton.me"},
 ]
 keywords = ["ai", "machine-learning", "signal", "fine-tuning", "llm", "conversational-ai"]
 classifiers = [
@@ -68,8 +68,8 @@ Documentation = "https://github.com/yourusername/astrabot/wiki"
 Repository = "https://github.com/yourusername/astrabot.git"
 Issues = "https://github.com/yourusername/astrabot/issues"
 
-[project.scripts]
-astrabot = "astrabot.cli:main"
+# [project.scripts]
+# astrabot = "src.cli:main"  # Uncomment when CLI module is implemented
 
 [tool.setuptools.packages.find]
 where = ["."]

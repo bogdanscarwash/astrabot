@@ -18,6 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced conversational training data creation system
 - Natural dialogue flow capture instead of forced Q&A format
 - Conversation role modeling and style preservation
+- **New Makefile with comprehensive development commands**
+- **Interactive test commands (test-file, test-one)**
+- **Code quality automation (format, lint, type-check, all)**
+- **Docker and data processing commands**
+- **Training pipeline automation**
+- **Development environment setup automation**
+- **Documentation generation commands**
+- **Pre-commit hook integration**
+- **Comprehensive reference documentation for Signal data schema**
+- **Detailed utilities reference documentation (config.py, logging.py)**
+- **Enhanced getting started tutorial with step-by-step guidance**
+- **Documentation index following Diátaxis framework**
+- **In-depth Signal CSV schema analysis with privacy levels**
+- **Data relationship diagrams and usage examples**
 
 ### Changed
 - Migrated from Q&A extraction to conversational training approach
@@ -25,11 +39,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated imports to reflect new module locations
 - Enhanced .gitignore for better privacy protection
 - Improved Twitter/X content extraction with structured outputs
+- **Updated project overview in CLAUDE.md with current architecture**
+- **Enhanced testing commands and code quality workflow**
+- **Improved Signal backup processing and training pipeline documentation**
+- **Updated environment setup and development workflow**
+- **Refined project structure and data processing flow documentation**
+- **Restructured getting started tutorial with troubleshooting section**
+- **Added model selection guide and training monitoring tips**
+- **Improved documentation navigation and cross-references**
 
 ### Fixed
 - Broken image description example in notebook
 - Incorrect role assignment in transform_to_conversations()
 - Import paths after module reorganization
+- **Updated author information in pyproject.toml**
+- **Enhanced pytest configuration for better test discovery**
+- **Improved setup.cfg with comprehensive tool configurations**
 
 ## [0.1.0] - 2024-01-01
 
