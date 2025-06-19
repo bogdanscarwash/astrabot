@@ -43,6 +43,7 @@ venv.bak/
 .env
 .env.local
 .env.*.local
+.envrc
 
 # Data files (privacy)
 data/raw/
