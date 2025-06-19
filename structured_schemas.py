@@ -13,15 +13,19 @@ from pydantic import BaseModel, Field
 
 class EmotionalTone(str, Enum):
     """Emotional tone categories for images and content."""
-    POSITIVE = "positive"
-    NEGATIVE = "negative"
-    NEUTRAL = "neutral"
+    ROMANTIC = "romantic"
     HUMOROUS = "humorous"
     SERIOUS = "serious"
-    NOSTALGIC = "nostalgic"
-    EXCITED = "excited"
+    SAD = "sad"
+    ANGRY = "angry"
     CONTEMPLATIVE = "contemplative"
-    
+    SLEEPY = "sleepy"
+    HAPPY = "happy"
+    ANXIOUS = "anxious"
+    BORED = "bored"
+    SENTIMENTAL = "sentimental"
+    SENSITIVE = "sensitive"
+
 
 
 class Sentiment(str, Enum):

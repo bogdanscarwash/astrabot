@@ -1,6 +1,14 @@
+#!/usr/bin/env python3
 """
 Test script for conversation utilities
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Add current directory to Python path for imports
+sys.path.insert(0, str(Path(__file__).parent))
 
 from conversation_utilities import (
     extract_tweet_text,
