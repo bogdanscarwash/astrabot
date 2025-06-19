@@ -13,7 +13,12 @@ from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import json
 
-from src.extractors.twitter_extractor import process_message_with_twitter_content
+from src.core.conversation_processor import process_message_with_twitter_content, preserve_conversation_dynamics
+from src.core.conversation_analyzer import (
+    create_conversation_windows,
+    segment_natural_dialogues,
+    model_conversation_roles
+)
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -444,3 +449,176 @@ def create_training_data_from_signal(
             'success': False,
             'error': str(e)
         }
+
+
+def create_conversational_training_data(messages_df: pd.DataFrame, recipients_df: pd.DataFrame, 
+                                      your_recipient_id: int = 2) -> List[Dict[str, any]]:
+    """
+    Unified pipeline to create natural conversational training data.
+    
+    This combines all conversation capture methods to create rich training examples
+    that preserve your natural communication style.
+    
+    Args:
+        messages_df: DataFrame of messages
+        recipients_df: DataFrame of recipients
+        your_recipient_id: Your recipient ID
+    
+    Returns:
+        List of training examples in multiple formats
+    """
+    print("Creating natural conversational training data...")
+    
+    # Filter for meaningful text messages
+    text_messages = messages_df[
+        (messages_df['body'].notna()) & 
+        (messages_df['body'].str.len() > 5)
+    ].copy()
+    
+    # Create recipient lookup for names
+    recipient_lookup = recipients_df.set_index('_id')['profile_given_name'].fillna('Unknown').to_dict()
+    
+    training_examples = []
+    
+    # 1. Conversation Windows (for context-aware responses)
+    print("Extracting conversation windows...")
+    conv_windows = create_conversation_windows(text_messages, window_size=5, your_recipient_id=your_recipient_id)
+    
+    for window in conv_windows:
+        # Format context as natural conversation
+        context_text = "\n".join([
+            f"{msg['speaker']}: {msg['text']}" 
+            for msg in window['context']
+        ])
+        
+        training_examples.append({
+            'instruction': f"Continue this {window['metadata']['momentum']} conversation naturally",
+            'input': context_text,
+            'output': window['response']['text'],
+            'metadata': {
+                'type': 'conversation_window',
+                'momentum': window['metadata']['momentum'],
+                'response_delay': window['metadata']['response_delay'],
+                'context_size': window['metadata']['context_size']
+            }
+        })
+    
+    # 2. Natural Dialogue Episodes (for complete conversation arcs)
+    print("Segmenting natural dialogue episodes...")
+    episodes = segment_natural_dialogues(text_messages, time_gap_minutes=30, your_recipient_id=your_recipient_id)
+    
+    # Model conversation roles
+    print("Modeling conversation roles...")
+    role_patterns = model_conversation_roles(episodes, your_recipient_id=your_recipient_id)
+    
+    for pattern in role_patterns:
+        # Format based on role and response type
+        context_text = "\n".join([
+            f"{msg['speaker']}: {msg['text']}" 
+            for msg in pattern['context']
+        ])
+        
+        instruction_map = {
+            'conversation_driver': "Lead the conversation forward",
+            'responsive_participant': "Respond thoughtfully to the conversation",
+            'active_engager': "Engage actively in this discussion",
+            'balanced_conversationalist': "Continue the balanced dialogue"
+        }
+        
+        training_examples.append({
+            'instruction': instruction_map.get(pattern['role'], "Continue naturally"),
+            'input': context_text,
+            'output': pattern['response']['text'],
+            'metadata': {
+                'type': 'role_based_response',
+                'role': pattern['role'],
+                'response_type': pattern['response_type'],
+                'position': pattern['metadata']['position_in_episode']
+            }
+        })
+    
+    # 3. Conversation Dynamics (for style preservation)
+    print("Preserving conversation dynamics...")
+    dynamics = preserve_conversation_dynamics(text_messages, your_recipient_id=your_recipient_id)
+    
+    for dynamic in dynamics:
+        # Handle different conversation styles
+        if dynamic['style'] == 'burst_sequence':
+            # For burst sequences, preserve the multi-message nature
+            context_text = "\n".join([
+                f"{msg['speaker']}: {msg['text']}" 
+                for msg in dynamic['context']
+            ])
+            
+            # Join messages with special token to preserve burst nature
+            output_text = " [NEXT] ".join([msg['text'] for msg in dynamic['your_sequence']])
+            
+            training_examples.append({
+                'instruction': "Respond in your natural burst texting style",
+                'input': context_text,
+                'output': output_text,
+                'metadata': {
+                    'type': 'burst_sequence',
+                    'sequence_length': dynamic['metadata']['sequence_length'],
+                    'has_media': dynamic['metadata']['has_media']
+                }
+            })
+        else:
+            # For single messages or long-form
+            if dynamic['context']:
+                context_text = "\n".join([
+                    f"{msg['speaker']}: {msg['text']}" 
+                    for msg in dynamic['context']
+                ])
+                
+                training_examples.append({
+                    'instruction': f"Respond with a {dynamic['style'].replace('_', ' ')} message",
+                    'input': context_text,
+                    'output': dynamic['your_sequence'][0]['text'],
+                    'metadata': {
+                        'type': dynamic['style'],
+                        'enhanced': dynamic['your_sequence'][0]['enhanced'],
+                        'char_count': dynamic['metadata']['total_chars']
+                    }
+                })
+    
+    # 4. Add conversation starters (where you initiate)
+    print("Adding conversation initiations...")
+    for episode in episodes:
+        if episode['metadata']['initiated_by'] == 'You' and episode['messages']:
+            # You started this conversation
+            first_msg = episode['messages'][0]
+            
+            # Try to find what prompted this (look at previous episode in same thread)
+            thread_episodes = [ep for ep in episodes if ep['thread_id'] == episode['thread_id']]
+            thread_episodes.sort(key=lambda x: x['messages'][0]['timestamp'])
+            
+            current_idx = thread_episodes.index(episode)
+            if current_idx > 0:
+                prev_episode = thread_episodes[current_idx - 1]
+                context = f"[Previous conversation ended {episode['metadata']['duration_minutes']:.0f} minutes ago with: {prev_episode['messages'][-1]['text']}]"
+            else:
+                context = "[Start a new conversation]"
+            
+            training_examples.append({
+                'instruction': "Initiate a conversation naturally",
+                'input': context,
+                'output': first_msg['text'],
+                'metadata': {
+                    'type': 'conversation_starter',
+                    'leads_to_episode_length': episode['metadata']['episode_length']
+                }
+            })
+    
+    print(f"\nCreated {len(training_examples)} conversational training examples:")
+    
+    # Show breakdown by type
+    type_counts = {}
+    for ex in training_examples:
+        ex_type = ex['metadata']['type']
+        type_counts[ex_type] = type_counts.get(ex_type, 0) + 1
+    
+    for ex_type, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True):
+        print(f"  {ex_type}: {count} examples ({count/len(training_examples)*100:.1f}%)")
+    
+    return training_examples

@@ -24,7 +24,7 @@ from typing import Optional, Dict, List, Tuple
 import os
 import tempfile
 from datetime import datetime
-from structured_schemas import (
+from src.models.schemas import (
     ImageDescription, TweetContent, ImageWithContext, 
     BatchImageDescription, EnhancedMessage, Sentiment,
     generate_json_schema, IMAGE_DESCRIPTION_SCHEMA
@@ -32,7 +32,7 @@ from structured_schemas import (
 
 # Import configuration
 try:
-    from config import config
+    from src.utils.config import config
 except ImportError:
     # Fallback if config.py is not available
     class Config:
@@ -881,3 +881,106 @@ def process_message_with_structured_content(
         tweet_contents=tweet_contents,
         image_descriptions=image_descriptions
     )
+
+
+def preserve_conversation_dynamics(messages_df, your_recipient_id=2):
+    """
+    Capture and preserve different conversation modes and dynamics.
+    
+    Args:
+        messages_df: DataFrame of messages
+        your_recipient_id: Your recipient ID
+    
+    Returns:
+        Conversation data with preserved dynamics and style patterns
+    """
+    conversation_dynamics = []
+    
+    # Group by thread
+    for thread_id in messages_df['thread_id'].unique():
+        thread_messages = messages_df[
+            messages_df['thread_id'] == thread_id
+        ].sort_values('date_sent')
+        
+        # Identify your message sequences
+        i = 0
+        while i < len(thread_messages):
+            # Find sequences where you're speaking
+            if thread_messages.iloc[i]['from_recipient_id'] == your_recipient_id:
+                # Collect your burst sequence
+                your_sequence = [thread_messages.iloc[i].to_dict()]
+                j = i + 1
+                
+                # Keep collecting while you're still talking and messages are close in time
+                while j < len(thread_messages):
+                    if thread_messages.iloc[j]['from_recipient_id'] == your_recipient_id:
+                        time_gap = (thread_messages.iloc[j]['date_sent'] - 
+                                   thread_messages.iloc[j-1]['date_sent']) / 1000
+                        if time_gap < 120:  # Within 2 minutes
+                            your_sequence.append(thread_messages.iloc[j].to_dict())
+                            j += 1
+                        else:
+                            break
+                    else:
+                        break
+                
+                # Get context before your sequence
+                context_start = max(0, i - 5)
+                context_messages = list(thread_messages.iloc[context_start:i].to_dict('records'))
+                
+                # Classify your conversation style for this sequence
+                if len(your_sequence) >= 3:
+                    style = 'burst_sequence'
+                elif len(your_sequence) == 1 and len(your_sequence[0]['body']) > 200:
+                    style = 'long_form'
+                elif len(your_sequence) == 2:
+                    style = 'double_tap'
+                else:
+                    style = 'single_message'
+                
+                # Check for media sharing
+                has_media = any(bool(re.search(r'https?://\S+', msg['body'])) for msg in your_sequence)
+                
+                # Enhance messages with Twitter content if present
+                enhanced_sequence = []
+                for msg in your_sequence:
+                    enhanced_text = process_message_with_twitter_content(
+                        msg['body'], 
+                        use_images=True,  # Enable image processing for richer training data
+                        image_api='openai'  # Use GPT-4o-mini for cost-effective vision processing
+                    )
+                    enhanced_msg = msg.copy()
+                    enhanced_msg['body'] = enhanced_text
+                    enhanced_msg['original_body'] = msg['body']
+                    enhanced_sequence.append(enhanced_msg)
+                
+                # Build the dynamics data
+                dynamics_data = {
+                    'thread_id': thread_id,
+                    'context': [{
+                        'speaker': 'You' if msg['from_recipient_id'] == your_recipient_id else 'Other',
+                        'text': msg['body'],
+                        'timestamp': msg['date_sent']
+                    } for msg in context_messages],
+                    'your_sequence': [{
+                        'text': msg['body'],
+                        'original_text': msg['original_body'],
+                        'timestamp': msg['date_sent'],
+                        'enhanced': msg['body'] != msg['original_body']
+                    } for msg in enhanced_sequence],
+                    'style': style,
+                    'metadata': {
+                        'sequence_length': len(your_sequence),
+                        'total_chars': sum(len(msg['body']) for msg in your_sequence),
+                        'has_media': has_media,
+                        'avg_message_length': sum(len(msg['body']) for msg in your_sequence) / len(your_sequence),
+                        'time_span_seconds': (your_sequence[-1]['date_sent'] - your_sequence[0]['date_sent']) / 1000 if len(your_sequence) > 1 else 0
+                    }
+                }
+                
+                conversation_dynamics.append(dynamics_data)
+                i = j
+            else:
+                i += 1
+    
+    return conversation_dynamics
