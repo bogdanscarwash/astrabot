@@ -20,10 +20,11 @@ Astrabot uses your Signal messenger backup to create a personalized AI that comm
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.9+ (required for dependencies)
 - Docker (for Signal backup processing)
 - CUDA-capable GPU (recommended for training)
 - Signal backup file (.backup)
+- `just` task runner (optional but recommended - see installation below)
 
 ### Installation
 
@@ -33,19 +34,39 @@ git clone https://github.com/yourusername/astrabot.git
 cd astrabot
 ```
 
-2. Set up the development environment:
+2. **One-command setup** (recommended):
 ```bash
-make setup-env
+bash scripts/bootstrap.sh
 ```
 
-3. Install dependencies:
+This bootstrap script will:
+- Check Python version (3.9+ required)
+- Install `uv` package manager if not present
+- Install all dependencies in a virtual environment
+- Set up pre-commit hooks
+- Verify the installation
+
+3. **Manual setup** (alternative):
 ```bash
-make install-dev
+# Install uv package manager (if not installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies
+uv sync
+
+# Install pre-commit hooks
+source .venv/bin/activate && pre-commit install
 ```
 
-4. Configure environment variables:
+4. **Install just task runner** (optional but recommended):
 ```bash
-# Edit .env with your API keys and settings
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin
+```
+
+5. Configure environment variables:
+```bash
+# Copy example and edit with your API keys
+cp .env.example .env
 nano .env
 ```
 
@@ -53,47 +74,71 @@ nano .env
 
 ### Available Commands
 
-Run `make help` to see all available commands:
+**With just task runner** (recommended - run `just help` to see all commands):
 
 ```bash
 # Setup
-make install         # Install production dependencies
-make install-dev     # Install all dependencies including dev tools
-make setup-env       # Set up development environment
+just install         # Install production dependencies
+just install-dev     # Install all dependencies including dev tools
+just setup-env       # Set up development environment
 
 # Testing
-make test           # Run all tests
-make test-unit      # Run only unit tests
-make test-integration # Run integration tests (requires API keys)
-make test-coverage  # Run tests with coverage report
-make test-file      # Run specific test file interactively
-make test-one       # Run specific test by name
+just test           # Run all tests
+just test-unit      # Run only unit tests
+just test-integration # Run integration tests (requires API keys)
+just test-coverage  # Run tests with coverage report
+just test-file      # Run specific test file interactively
+just test-one       # Run specific test by name
+just test-quick     # Quick test run without coverage
+just test-watch     # Watch tests and rerun on changes
 
 # Code Quality
-make lint           # Run flake8 linting
-make format         # Format code with black
-make type-check     # Run mypy type checking
-make all            # Run format, lint, and type-check
+just lint           # Run flake8 linting
+just format         # Format code with black and isort
+just type-check     # Run mypy type checking
+just all            # Run format, lint, and type-check
+just pre-commit     # Run pre-commit hooks
+
+# UV Package Management
+just uv-sync        # Sync dependencies with uv
+just uv-add PKG     # Add a new dependency
+just uv-remove PKG  # Remove a dependency
+just uv-update      # Update all dependencies
 
 # Docker & Data Processing
-make docker-build   # Build Signal backup tools Docker image
-make process-signal # Process Signal backup data
+just docker-build   # Build Signal backup tools Docker image
+just process-signal # Process Signal backup data
 
 # Training
-make train          # Run training pipeline
+just train          # Run training pipeline
+just train-qwen3    # Train Qwen3 model with full pipeline
+just train-qwen3-small  # Train small Qwen3 model for testing
 
 # Utilities
-make clean          # Clean up generated files
-make notebook       # Run Jupyter notebook server
-make docs           # Generate documentation
-make pre-commit     # Run pre-commit hooks
+just clean          # Clean up generated files
+just notebook       # Run Jupyter notebook server
+just docs           # Generate documentation
+```
+
+**Without just** (direct commands):
+
+```bash
+# Activate virtual environment first
+source .venv/bin/activate
+
+# Then use standard tools
+pytest              # Run tests
+black src/ tests/   # Format code
+flake8 src/ tests/  # Lint code
+mypy src/           # Type check
+uv sync             # Sync dependencies
 ```
 
 ### Processing Signal Backup
 
 1. Build the Signal backup tools Docker image:
 ```bash
-make docker-build
+just docker-build
 ```
 
 2. Extract your Signal backup:
@@ -105,20 +150,26 @@ docker run -v /path/to/backup:/backup -v $(pwd)/data/raw/signal-flatfiles:/outpu
 
 3. Process the extracted data:
 ```bash
-make process-signal
+just process-signal
 ```
 
 ### Training Your Model
 
 #### Option 1: Interactive Notebook
 ```bash
-make notebook
+just notebook
 # Navigate to notebooks/03_training_pipeline.ipynb
 ```
 
 #### Option 2: Command Line
 ```bash
-make train
+# Basic training
+just train
+
+# Qwen3 model training options
+just train-qwen3        # Full training pipeline
+just train-qwen3-small  # Small model for testing
+just train-qwen3-test   # Test training with debug output
 ```
 
 The training pipeline will:
@@ -197,18 +248,24 @@ The project follows a strong TDD approach with comprehensive test coverage:
 
 ```bash
 # Run all tests
-make test
+just test
 
 # Run specific test file
-make test-file
+just test-file
 # Enter: tests/unit/test_conversation_processor.py
 
 # Run with coverage
-make test-coverage
+just test-coverage
 
 # Run specific test
-make test-one
+just test-one
 # Enter: test_extract_tweet_text
+
+# Quick testing (no coverage)
+just test-quick
+
+# Watch mode (reruns tests on file changes)
+just test-watch
 ```
 
 ## Code Quality
@@ -216,17 +273,20 @@ make test-one
 Maintain high code quality with automated tools:
 
 ```bash
-# Format code
-make format
+# Format code (black + isort)
+just format
 
-# Run linting
-make lint
+# Run linting (flake8)
+just lint
 
-# Type checking
-make type-check
+# Type checking (mypy)
+just type-check
 
 # Run all quality checks
-make all
+just all
+
+# Run pre-commit hooks
+just pre-commit
 ```
 
 ## Privacy & Security
@@ -241,9 +301,50 @@ make all
 This is a personal project, but if you'd like to contribute:
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes with tests
-4. Run `make all` to ensure code quality
-5. Submit a pull request
+3. Run `bash scripts/bootstrap.sh` to set up your environment
+4. Make your changes with tests
+5. Run `just all` to ensure code quality
+6. Submit a pull request
+
+## Migration Guide
+
+**For existing developers upgrading from the old Makefile system:**
+
+1. **Run the bootstrap script** to set up the new environment:
+   ```bash
+   bash scripts/bootstrap.sh
+   ```
+
+2. **Command equivalents** - all your familiar commands work the same:
+   ```bash
+   # Old Makefile → New just commands
+   make install      → just install
+   make test         → just test
+   make lint         → just lint
+   make format       → just format
+   make all          → just all
+   make clean        → just clean
+   ```
+
+3. **New features available**:
+   ```bash
+   just uv-add package-name    # Add dependencies easily
+   just test-watch            # Auto-rerun tests on changes
+   just train-qwen3-small     # Quick model testing
+   ```
+
+4. **What changed**:
+   - Dependencies now managed with `uv` (faster, more reliable)
+   - All tool configurations consolidated in `pyproject.toml`
+   - Pre-commit hooks automatically configured
+   - Python 3.9+ now required (was 3.8+)
+
+5. **If you prefer the old way**: All commands still work directly:
+   ```bash
+   source .venv/bin/activate
+   pytest  # instead of just test
+   black src/ tests/  # instead of just format
+   ```
 
 ## License
 
