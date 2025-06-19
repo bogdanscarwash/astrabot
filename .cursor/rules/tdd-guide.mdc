@@ -1,0 +1,35 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Astrabot Test-Driven Development (TDD) Rule
+
+All code contributions and changes in this project must follow the TDD methodology as described in [tdd-guide.md](mdc:docs/explanation/tdd-guide.md):
+
+## TDD Workflow Requirements
+- **Red Phase**: Write or update tests before implementing new features or bug fixes. Tests should clearly define the expected behavior and requirements.
+- **Green Phase**: Implement the minimal code necessary to make the tests pass.
+- **Refactor Phase**: Refactor code for clarity, performance, and maintainability, ensuring all tests continue to pass.
+
+## Test Organization
+- Place unit tests, integration tests, and security tests in the `tests/` directory, following the structure in the guide.
+- Each test should have a single clear purpose and be independent and isolated.
+- Use fixtures for setup/teardown as needed.
+
+## Best Practices
+- Mock external dependencies in unit tests.
+- Use descriptive test names and docstrings.
+- Add security and performance tests for relevant features.
+- Treat tests as documentation and usage examples.
+- Run all tests before merging or deploying code.
+
+## Running Tests
+- Use `pytest` to run all or specific tests as described in the guide.
+- Ensure high test coverage and address failing tests before proceeding.
+
+## Continuous TDD
+- For new features, bug reports, or performance/security issues, always start by writing a failing test.
+- If it's not tested, it's broken.
+
+See [tdd-guide.md](mdc:docs/explanation/tdd-guide.md) for detailed examples and rationale.

@@ -1,0 +1,32 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Astrabot Documentation and Project Rules
+
+## Documentation Structure
+
+Astrabot's documentation follows the [Diátaxis](https://diataxis.fr/) framework, organized into four main types:
+
+- **Tutorials** (`docs/tutorials/`): Step-by-step guides for onboarding and first training runs. Start with [getting-started.md](mdc:docs/tutorials/getting-started.md) and [first-training-run.md](mdc:docs/tutorials/first-training-run.md).
+- **How-To Guides** (`docs/how-to/`): Task-oriented guides for data extraction, conversation processing, environment setup, and advanced training. See [process-signal-backup.md](mdc:docs/how-to/process-signal-backup.md), [process-conversations.md](mdc:docs/how-to/process-conversations.md), and [fine-tune-qwen3.md](mdc:docs/how-to/fine-tune-qwen3.md).
+- **Reference** (`docs/reference/`): Technical API, schema, and utility documentation. Key files: [api.md](mdc:docs/reference/api.md), [signal-data-schema.md](mdc:docs/reference/signal-data-schema.md), [utilities.md](mdc:docs/reference/utilities.md), [environment-variables.md](mdc:docs/reference/environment-variables.md), [api/training-data-creator.md](mdc:docs/reference/api/training-data-creator.md).
+- **Explanation** (`docs/explanation/`): Conceptual and architectural guides. See [architecture.md](mdc:docs/explanation/architecture.md), [privacy-architecture.md](mdc:docs/explanation/privacy-architecture.md), and [tdd-guide.md](mdc:docs/explanation/tdd-guide.md).
+
+## Key Project Rules
+
+- Always start with the relevant tutorial or how-to guide for new tasks or workflows.
+- For API usage, data schemas, and utility functions, consult the reference docs first.
+- For understanding design decisions, privacy, and TDD methodology, see the explanation docs.
+- Privacy and security are core to the project—review [privacy-architecture.md](mdc:docs/explanation/privacy-architecture.md) and [environment-variables.md](mdc:docs/reference/environment-variables.md) before handling sensitive data.
+- All code and data processing should follow the TDD methodology as described in [tdd-guide.md](mdc:docs/explanation/tdd-guide.md).
+- The main entry point for documentation is [index.md](mdc:docs/index.md), which links to all major sections.
+
+## Quick Reference
+- [Project Structure](mdc:docs/index.md)
+- [First Training Run](mdc:docs/tutorials/first-training-run.md)
+- [Signal Data Schema](mdc:docs/reference/signal-data-schema.md)
+- [API Reference](mdc:docs/reference/api.md)
+- [Privacy Architecture](mdc:docs/explanation/privacy-architecture.md)
+- [TDD Guide](mdc:docs/explanation/tdd-guide.md)

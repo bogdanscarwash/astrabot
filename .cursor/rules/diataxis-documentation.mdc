@@ -1,0 +1,73 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Diátaxis Documentation Framework Rule
+
+All documentation in this project must be created and organized according to the [Diátaxis framework](https://diataxis.fr/), which provides a systematic approach to technical documentation.
+
+## Documentation Structure
+
+Documentation must be organized into four distinct types, each serving a specific purpose:
+
+### Tutorials (Learning-Oriented)
+- **Purpose**: Introduce, educate, and lead users through learning experiences
+- **Question answered**: "Can you teach me to...?"
+- **Orientation**: Learning
+- **Form**: Lessons that provide complete learning experiences
+- **Location**: `docs/tutorials/`
+
+### How-to Guides (Task-Oriented)
+- **Purpose**: Help users achieve specific goals
+- **Question answered**: "How do I...?"
+- **Orientation**: Goals and user needs
+- **Form**: Step-by-step instructions focused on user projects
+- **Location**: `docs/how-to/`
+
+### Reference (Information-Oriented)
+- **Purpose**: Describe the machinery and provide technical information
+- **Question answered**: "What is...?"
+- **Orientation**: Information
+- **Form**: Dry, factual descriptions
+- **Location**: `docs/reference/`
+
+### Explanation (Understanding-Oriented)
+- **Purpose**: Illuminate topics and provide understanding
+- **Question answered**: "Why...?"
+- **Orientation**: Understanding
+- **Form**: Discursive explanations and discussions
+- **Location**: `docs/explanation/`
+
+## Writing Principles
+
+### How-to Guides Must Address User Problems
+- Write from the user's perspective, not the machinery's perspective
+- Focus on what users need to accomplish, not what the system can do
+- Address human projects and real-world needs
+- Tools should appear as incidental means to user ends
+
+### Work Iteratively
+- Make small, responsive improvements rather than large rewrites
+- Choose any piece of documentation and assess it critically
+- Make single, immediate improvements and publish them
+- Avoid planning and top-down workflows in favor of emergent patterns
+
+### Quality Standards
+- Each piece of content should have one clear job to do
+- Content should be clearly distinguished from other documentation types
+- Focus on meaningfulness and purpose rather than just functionality
+- Ensure content serves user needs effectively
+
+## Implementation Guidelines
+
+- Use Diátaxis as a guide, not a plan - it's a map to check direction
+- Work one step at a time, publishing improvements immediately
+- Don't try to work on the big picture - take small steps toward goals
+- Assess existing documentation critically according to Diátaxis standards
+- Focus on user needs and meaningful outcomes rather than tool functionality
+
+## Reference
+- [Diátaxis Framework](https://diataxis.fr/)
+- [How to Use Diátaxis](https://diataxis.fr/how-to-use-diataxis/)
+- [Documentation Map](https://diataxis.fr/map/)

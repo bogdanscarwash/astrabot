@@ -1,0 +1,34 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Astrabot Privacy Architecture Rule
+
+All code, data processing, and documentation in this project must strictly follow the privacy requirements and best practices described in [privacy-architecture.md](mdc:docs/explanation/privacy-architecture.md):
+
+## Core Privacy Principles
+- **Local-first processing**: User data must not leave the local machine unless explicitly intended by the user.
+- **Defense in depth**: Multiple layers of privacy protection must be implemented (e.g., masking, anonymization, encryption).
+- **Transparent data handling**: All data flows and transformations must be clear and documented.
+- **User control**: Users must be able to decide what data is included, excluded, or anonymized.
+
+## Data Handling Rules
+- **Critical and high privacy data** (message content, phone numbers, contact names, identifiers) must never be logged, committed, or exported unencrypted.
+- **Sensitive data masking** must be applied in all logs and outputs (see `mask_sensitive_data` in [utilities.md](mdc:docs/reference/utilities.md)).
+- **Anonymization** must be performed before sharing or exporting any data or models.
+- **Access controls** and secure file permissions must be enforced for all sensitive files.
+- **No cloud dependencies** for core processing; all processing should default to local execution.
+
+## Developer Responsibilities
+- Review and follow the privacy code review checklist in [privacy-architecture.md](mdc:docs/explanation/privacy-architecture.md).
+- Never log or expose message content, phone numbers, or personal identifiers.
+- Ensure all exports and shared models are sanitized and free of personal data.
+- Use encryption for all exports containing sensitive data.
+- Regularly audit code and data for privacy compliance.
+
+## Emergency Protocols
+- If a privacy breach is suspected, immediately follow the data breach protocol in [privacy-architecture.md](mdc:docs/explanation/privacy-architecture.md).
+
+## Reference
+- For implementation details and code examples, see [privacy-architecture.md](mdc:docs/explanation/privacy-architecture.md) and [utilities.md](mdc:docs/reference/utilities.md).

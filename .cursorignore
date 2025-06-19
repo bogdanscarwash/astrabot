@@ -1,0 +1,12 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+data/raw/**/*.csv
+data/logs/**/*.log
+data/cache/**/*.json
+data/processed/**/*.csv
+data/processed/**/*.json
+data/processed/**/*.parquet
+data/processed/**/*.pickle
+data/processed/**/*.pkl
+data/processed/**/*.pth
+data/processed/**/*.ptcsv
+LICENSE
