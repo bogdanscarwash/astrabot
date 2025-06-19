@@ -128,6 +128,8 @@ class TweetContent(BaseModel):
     mentioned_users: List[str] = Field(default_factory=list, description="Mentioned @usernames")
     hashtags: List[str] = Field(default_factory=list, description="Hashtags in the tweet")
     sentiment: Sentiment = Field(default=Sentiment.NEUTRAL, description="Overall sentiment")
+    is_thread: bool = Field(default=False, description="Whether this tweet is part of a thread")
+    is_retweet: bool = Field(default=False, description="Whether this is a retweet")
     
     def to_training_format(self) -> str:
         """Convert to a format suitable for training data injection."""

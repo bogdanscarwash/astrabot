@@ -7,22 +7,18 @@ import pandas as pd
 from datetime import datetime
 from unittest.mock import Mock, patch, MagicMock
 
-from src.core.metadata_enricher import (
-    add_reaction_context,
-    add_group_context,
-    add_temporal_context,
-    add_conversation_flow_metadata,
-    enrich_messages_with_all_metadata,
-    classify_urgency,
-    classify_emotion_from_reactions
-)
+from src.core.metadata_enricher import MetadataEnricher
 from src.models.schemas import EnhancedMessage, TweetContent, ImageDescription
 
 
 @pytest.mark.unit
-@pytest.mark.skip(reason="MetadataEnricher class not implemented, only functions exist")
 class TestMetadataEnricher:
     """Test metadata enrichment functionality"""
+    
+    @pytest.fixture
+    def enricher(self):
+        """Create MetadataEnricher instance"""
+        return MetadataEnricher()
     
     @pytest.fixture
     def sample_message(self):

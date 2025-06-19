@@ -8,7 +8,7 @@ to verify all components work together correctly.
 
 import pandas as pd
 from datetime import datetime
-from src.core.conversation_processor_enhanced import EnhancedConversationProcessor
+from src.core.conversation_processor import EnhancedConversationProcessor
 from src.models.conversation_schemas import ConversationThread
 
 def test_enhanced_processor():

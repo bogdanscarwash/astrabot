@@ -8,18 +8,11 @@ from pathlib import Path
 import tempfile
 import torch
 
-from src.llm.adaptive_trainer import (
-    create_adaptive_training_data,
-    analyze_your_adaptation_patterns,
-    create_style_aware_instructions,
-    analyze_style_matching_patterns,
-    create_persona_based_training_data
-)
+from src.llm.adaptive_trainer import AdaptiveTrainer
 
 
 @pytest.mark.unit
 @pytest.mark.llm
-@pytest.mark.skip(reason="AdaptiveTrainer class not implemented, only functions exist")
 class TestAdaptiveTrainer:
     """Test adaptive training functionality"""
     
@@ -37,6 +30,31 @@ class TestAdaptiveTrainer:
                 'date_sent': int(datetime.now().timestamp() * 1000)
             }
         ])
+    
+    @pytest.fixture
+    def trainer(self):
+        """Create AdaptiveTrainer instance"""
+        return AdaptiveTrainer(your_recipient_id=2)
+    
+    @pytest.fixture
+    def sample_training_config(self):
+        """Create sample training configuration"""
+        return {
+            'model_name': 'Qwen/Qwen2.5-3B',
+            'max_seq_length': 2048,
+            'lora_r': 8,
+            'lora_alpha': 16,
+            'lora_dropout': 0.05,
+            'learning_rate': 2e-5,
+            'num_train_epochs': 3,
+            'per_device_train_batch_size': 4,
+            'gradient_accumulation_steps': 1,
+            'warmup_steps': 100,
+            'logging_steps': 10,
+            'save_steps': 500,
+            'evaluation_strategy': 'steps',
+            'eval_steps': 100
+        }
     
     @pytest.fixture
     def sample_training_data(self):

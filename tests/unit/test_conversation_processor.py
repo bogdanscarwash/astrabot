@@ -46,10 +46,10 @@ class TestConversationProcessor:
             
             # If successful, should return TweetContent object
             if result and isinstance(result, TweetContent):
-                self.assertIsInstance(result, TweetContent)
-                self.assertEqual(result.tweet_id, '123456789')
-                self.assertIsInstance(result.hashtags, list)
-                self.assertIsInstance(result.mentioned_users, list)
+                assert isinstance(result, TweetContent)
+                assert result.tweet_id == '123456789'
+                assert isinstance(result.hashtags, list)
+                assert isinstance(result.mentioned_users, list)
     
     def test_inject_tweet_context(self):
         """Test injecting tweet context into a message"""
@@ -62,10 +62,10 @@ class TestConversationProcessor:
         
         result = inject_tweet_context(message, tweet_data)
         
-        self.assertIn(message, result)
-        self.assertIn('[TWEET: @testuser]', result)
-        self.assertIn('This is a test tweet', result)
-        self.assertIn('[/TWEET]', result)
+        assert message in result
+        assert '[TWEET: @testuser]' in result
+        assert 'This is a test tweet' in result
+        assert '[/TWEET]' in result
     
     def test_inject_tweet_context_no_data(self):
         """Test injecting tweet context with no tweet data"""
@@ -147,7 +147,7 @@ class TestStructuredContent:
             description="A test image",
             detected_text=None,
             main_subjects=["test", "image"],
-            emotional_tone="neutral"
+            emotional_tone="casual"  # Changed from "neutral" which doesn't exist
         )
         
         enhanced = EnhancedMessage(
@@ -220,8 +220,8 @@ class TestConversationTracking:
         )
         
         assert img_context.conversation_id == "conv_123"
-        self.assertEqual(img_context.sender_id, "user_789")
-        self.assertIsNotNone(img_context.timestamp)
+        assert img_context.sender_id == "user_789"
+        assert img_context.timestamp is not None
     
     def test_batch_image_description_structure(self):
         """Test BatchImageDescription structure"""
@@ -240,7 +240,7 @@ class TestConversationTracking:
             description="Test description",
             detected_text=None,
             main_subjects=["test"],
-            emotional_tone="neutral"
+            emotional_tone="casual"  # Changed from "neutral" which doesn't exist
         )
         
         batch_desc = BatchImageDescription(
@@ -250,11 +250,11 @@ class TestConversationTracking:
         
         context_dict = batch_desc.to_dict_with_context()
         
-        self.assertIn('conversation_id', context_dict)
-        self.assertIn('sender_id', context_dict)
-        self.assertIn('description', context_dict)
-        self.assertIn('emotional_tone', context_dict)
-        self.assertEqual(context_dict['conversation_id'], "conv_123")
+        assert 'conversation_id' in context_dict
+        assert 'sender_id' in context_dict
+        assert 'description' in context_dict
+        assert 'emotional_tone' in context_dict
+        assert context_dict['conversation_id'] == "conv_123"
 
 
 @pytest.mark.unit
@@ -292,6 +292,6 @@ class TestDataPipeline:
             (messages_df['body'].str.len() > 5)
         ]
         
-        # Should keep messages 1 and 2
+        # Should keep messages 2 and 3 (longer than 5 chars)
         assert len(filtered) == 2
-        assert 'https://twitter.com' in filtered['body'].iloc[1]
+        assert 'https://twitter.com' in filtered['body'].iloc[0]  # First in filtered results

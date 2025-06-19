@@ -426,6 +426,10 @@ class TrainingDataCreator:
         else:
             your_recipient_id = int(your_recipient_id)
             
+        # Handle empty input
+        if messages_df is None or (isinstance(messages_df, list) and len(messages_df) == 0):
+            return []
+            
         # Convert EnhancedMessage objects to DataFrame if needed
         if isinstance(messages_df, list) and len(messages_df) > 0:
             # Assume it's a list of EnhancedMessage objects
@@ -448,6 +452,10 @@ class TrainingDataCreator:
                 {'_id': your_recipient_id, 'profile_given_name': 'You'},
                 {'_id': 3, 'profile_given_name': 'Friend'}
             ])
+            
+        # Apply minimum message length filter if needed
+        if min_message_length > 0 and not messages_df.empty:
+            messages_df = messages_df[messages_df['body'].str.len() >= min_message_length]
             
         # Use the existing standalone function and convert format
         raw_examples = create_conversational_training_data(messages_df, recipients_df, your_recipient_id)
@@ -501,10 +509,40 @@ class TrainingDataCreator:
                 'content': example['output']
             })
             
-            chat_examples.append({
-                'messages': messages,
-                'metadata': example.get('metadata', {})
-            })
+            if include_metadata:
+                metadata = example.get('metadata', {})
+                # Add expected metadata fields if not present
+                if 'conversation_id' not in metadata:
+                    metadata['conversation_id'] = 'conv_default'
+                if 'timestamp' not in metadata:
+                    metadata['timestamp'] = datetime.now().isoformat()
+                if 'message_count' not in metadata:
+                    metadata['message_count'] = len(messages)
+                    
+                chat_examples.append({
+                    'messages': messages,
+                    'metadata': metadata
+                })
+            else:
+                chat_examples.append({
+                    'messages': messages
+                })
+        
+        # Apply deduplication if requested
+        if deduplicate and chat_examples:
+            seen_contents = set()
+            unique_examples = []
+            for ex in chat_examples:
+                # Create a hash of the message contents
+                content_hash = hash(tuple(msg['content'] for msg in ex['messages']))
+                if content_hash not in seen_contents:
+                    seen_contents.add(content_hash)
+                    unique_examples.append(ex)
+            chat_examples = unique_examples
+            
+        # Apply batch size limit if specified
+        if batch_size and len(chat_examples) > batch_size:
+            chat_examples = chat_examples[:batch_size]
             
         return chat_examples
     

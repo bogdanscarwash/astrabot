@@ -17,9 +17,10 @@ import re
 import time
 import json
 import functools
+import sys
 from typing import Optional, Dict, Any, Union
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 import threading
 
 # Import configuration
@@ -31,15 +32,14 @@ except ImportError:
 
 # Sensitive data patterns to mask
 SENSITIVE_PATTERNS = [
-    # API Keys
-    (r'(sk-[A-Za-z0-9]{32,})', 'sk-****'),
-    (r'(AIza[A-Za-z0-9\-_]{35})', 'AIza****'),
+    # API Keys - Fixed to match shorter keys too
+    (r'sk-[A-Za-z0-9]{8,}', 'sk-****'),
+    (r'AIza[A-Za-z0-9\-_]{6,}', 'AIza****'),
     (r'(api[_-]?key\s*[=:]\s*)([A-Za-z0-9\-_]+)', r'\1****'),
     (r'(Bearer\s+)([A-Za-z0-9\-_\.]+)', r'\1****'),
     # General tokens
     (r'(token\s*[=:]\s*)([A-Za-z0-9\-_]+)', r'\1****'),
     (r'(password\s*[=:]\s*)([^\s]+)', r'\1****'),
-
 ]
 
 
@@ -78,7 +78,7 @@ class JSONFormatter(logging.Formatter):
     
     def format(self, record):
         log_data = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'level': record.levelname,
             'logger': record.name,
             'message': record.getMessage(),
@@ -216,11 +216,11 @@ def setup_logging(
             datefmt='%Y-%m-%d %H:%M:%S'
         )
     
-    # Console handler
+    # Console handler - default to stdout instead of stderr
     if stream is not None:
         console_handler = logging.StreamHandler(stream)
     else:
-        console_handler = logging.StreamHandler()
+        console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
     console_handler.addFilter(logger._sensitive_filter)
     console_handler.addFilter(logger._context_filter)

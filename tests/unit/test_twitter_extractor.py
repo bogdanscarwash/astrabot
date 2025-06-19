@@ -6,23 +6,19 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 
-from src.extractors.twitter_extractor import (
-    extract_tweet_text,
-    inject_tweet_context,
-    extract_tweet_images,
-    describe_tweet_images,
-    describe_tweet_images_with_context,
-    process_message_with_twitter_content,
-    process_message_with_structured_content
-)
+from src.core.conversation_processor import TwitterExtractor
 from src.models.schemas import TweetContent, ImageDescription
 
 
 @pytest.mark.unit
 @pytest.mark.twitter
-@pytest.mark.skip(reason="TwitterExtractor class not implemented, only functions exist")
 class TestTwitterExtractor:
     """Test Twitter/X content extraction functionality"""
+    
+    @pytest.fixture
+    def extractor(self):
+        """Create TwitterExtractor instance"""
+        return TwitterExtractor()
     
     @pytest.fixture
     def sample_tweet_html(self):
@@ -79,7 +75,7 @@ class TestTwitterExtractor:
             tweet_id = extractor.extract_tweet_id(url)
             assert tweet_id is None
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_extract_tweet_content(self, mock_get, extractor, sample_tweet_html):
         """Test tweet content extraction"""
         mock_response = MagicMock()
@@ -97,7 +93,7 @@ class TestTwitterExtractor:
         assert 'hashtags' in tweet_content.hashtags
         assert 'mentions' in tweet_content.mentioned_users
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_extract_tweet_images(self, mock_get, extractor, sample_tweet_html):
         """Test tweet image extraction"""
         mock_response = MagicMock()
@@ -114,7 +110,7 @@ class TestTwitterExtractor:
         assert images[0].endswith('.jpg')
         assert images[1].endswith('.png')
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_nitter_fallback(self, mock_get, extractor):
         """Test Nitter instance fallback"""
         # First call fails, second succeeds
@@ -134,7 +130,7 @@ class TestTwitterExtractor:
         assert tweet_content.text == 'Success!'
         assert mock_get.call_count == 2
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_all_nitter_instances_fail(self, mock_get, extractor):
         """Test handling when all Nitter instances fail"""
         mock_response = MagicMock()
@@ -182,7 +178,7 @@ class TestTwitterExtractor:
         assert neg_sentiment == 'negative'
         assert neu_sentiment == 'neutral'
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_caching(self, mock_get, extractor):
         """Test response caching"""
         mock_response = MagicMock()
@@ -214,7 +210,7 @@ class TestTwitterExtractor:
             assert twitter_url.startswith('https://pbs.twimg.com/media/')
             assert 'test.jpg' in twitter_url or 'image.png' in twitter_url or 'photo.gif' in twitter_url
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_thread_detection(self, mock_get, extractor):
         """Test thread/reply detection"""
         thread_html = """
@@ -234,7 +230,7 @@ class TestTwitterExtractor:
         
         assert tweet_content.is_thread is True
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_retweet_detection(self, mock_get, extractor):
         """Test retweet detection"""
         retweet_html = """
@@ -275,7 +271,7 @@ class TestTwitterExtractor:
         for url in invalid_urls:
             assert extractor.is_valid_twitter_url(url) is False
     
-    @patch('src.extractors.twitter_extractor.requests.get')
+    @patch('src.core.conversation_processor.requests.get')
     def test_rate_limiting_handling(self, mock_get, extractor):
         """Test rate limiting handling"""
         mock_response = MagicMock()

@@ -14,7 +14,7 @@ from src.core.conversation_analyzer import (
     analyze_conversational_patterns
 )
 
-# Import conversation processor functions
+# Import conversation processor functions and classes
 from src.core.conversation_processor import (
     extract_tweet_text,
     inject_tweet_context,
@@ -23,7 +23,9 @@ from src.core.conversation_processor import (
     describe_tweet_images_with_context,
     process_message_with_twitter_content,
     process_message_with_structured_content,
-    preserve_conversation_dynamics
+    preserve_conversation_dynamics,
+    TwitterExtractor,
+    EnhancedConversationProcessor
 )
 
 # Import metadata enricher functions
@@ -76,6 +78,8 @@ __all__ = [
     "process_message_with_twitter_content",
     "process_message_with_structured_content",
     "preserve_conversation_dynamics",
+    "TwitterExtractor",
+    "EnhancedConversationProcessor",
     
     # Metadata enricher
     "add_reaction_context",
