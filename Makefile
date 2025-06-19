@@ -35,6 +35,10 @@ help:
 	@echo ""
 	@echo "Training:"
 	@echo "  make train          Run training pipeline"
+	@echo "  make train-qwen3    Train Qwen3 model with full pipeline"
+	@echo "  make train-qwen3-small  Train small Qwen3 model (3B) for testing"
+	@echo "  make train-qwen3-multistage  Train with multi-stage approach"
+	@echo "  make train-qwen3-test  Test training with debug output"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean          Clean up generated files"
@@ -157,6 +161,44 @@ train:
 	else \
 		python scripts/train.py; \
 	fi
+
+# Train with Qwen3 model
+train-qwen3:
+	@echo "Starting Qwen3 training pipeline..."
+	python scripts/train_qwen3.py \
+		--config configs/training_config.yaml \
+		--messages data/raw/signal-flatfiles/signal.csv \
+		--recipients data/raw/signal-flatfiles/recipient.csv \
+		--output ./models/qwen3-personal
+
+# Train Qwen3 small model (3B) for testing
+train-qwen3-small:
+	@echo "Training small Qwen3 model for testing..."
+	python scripts/train_qwen3.py \
+		--config configs/training_config.yaml \
+		--messages data/raw/signal-flatfiles/signal.csv \
+		--recipients data/raw/signal-flatfiles/recipient.csv \
+		--output ./models/qwen3-small \
+		--test
+
+# Train Qwen3 with multi-stage approach
+train-qwen3-multistage:
+	@echo "Starting multi-stage Qwen3 training..."
+	python scripts/train_qwen3.py \
+		--config configs/training_config.yaml \
+		--multi-stage \
+		--output ./models/qwen3-multistage
+
+# Test Qwen3 training with debug output
+train-qwen3-test:
+	@echo "Testing Qwen3 training pipeline..."
+	python scripts/train_qwen3.py \
+		--config configs/training_config.yaml \
+		--messages data/raw/signal-flatfiles/signal.csv \
+		--recipients data/raw/signal-flatfiles/recipient.csv \
+		--output ./models/qwen3-test \
+		--debug \
+		--test
 
 # Development environment setup
 setup-env:

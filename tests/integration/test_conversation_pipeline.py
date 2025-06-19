@@ -8,10 +8,12 @@ from pathlib import Path
 from unittest.mock import patch
 from datetime import datetime
 
-from src.core.conversation_processor import ConversationProcessor
+from src.core.conversation_processor import (
+    EnhancedConversationProcessor as ConversationProcessor,
+    TwitterExtractor
+)
 from src.core.conversation_analyzer import ConversationAnalyzer
 from src.core.style_analyzer import StyleAnalyzer
-from src.extractors.twitter_extractor import TwitterExtractor
 
 
 @pytest.mark.integration
@@ -64,7 +66,7 @@ class TestConversationPipeline:
         if not processor.config.has_vision_capabilities():
             pytest.skip("Vision API keys not available")
         
-        with patch('src.extractors.twitter_extractor.requests.get') as mock_get:
+        with patch('src.core.conversation_processor.requests.get') as mock_get:
             # Mock Twitter response
             mock_response = mock_get.return_value
             mock_response.status_code = 200
@@ -198,7 +200,7 @@ class TestConversationPipeline:
             'invalid_url'
         ]
         
-        with patch('src.extractors.twitter_extractor.requests.get') as mock_get:
+        with patch('src.core.conversation_processor.requests.get') as mock_get:
             # Mock successful response
             mock_response = mock_get.return_value
             mock_response.status_code = 200

@@ -1,0 +1,168 @@
+# Astrabot Training Configuration
+# This configuration file defines parameters for fine-tuning Qwen3 models on personal conversation data
+
+model:
+  # Base model selection - supports Qwen3 variants
+  name: "unsloth/Qwen3-14B"  # Options: Qwen3-3B, Qwen3-8B, Qwen3-14B
+  max_seq_length: 4096  # Qwen3 supports up to 32k, but 4k is memory efficient
+  load_in_4bit: true  # Use 4-bit quantization for memory efficiency
+  load_in_8bit: false  # Alternative: 8-bit for better accuracy
+  dtype: null  # Auto-detect based on hardware (float16/bfloat16)
+  
+lora:
+  # LoRA configuration for efficient fine-tuning
+  r: 32  # Rank - higher for Qwen3-14B
+  alpha: 32  # Alpha = rank for optimal performance
+  dropout: 0.05  # Small dropout for regularization
+  target_modules:
+    - "q_proj"
+    - "k_proj" 
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  bias: "none"  # Optimized for memory
+  use_gradient_checkpointing: "unsloth"  # Essential for large models
+  use_rslora: true  # Rank-stabilized LoRA
+  random_state: 3407  # For reproducibility
+
+training:
+  # Training hyperparameters
+  num_train_epochs: 3  # Full training runs
+  per_device_train_batch_size: 2  # Adjust based on GPU memory
+  gradient_accumulation_steps: 8  # Effective batch size = 16
+  learning_rate: 2e-5  # Lower for Qwen3 fine-tuning
+  warmup_steps: 100  # Gradual warmup
+  logging_steps: 10
+  save_steps: 500
+  save_total_limit: 3  # Keep best checkpoints
+  evaluation_strategy: "steps"
+  eval_steps: 100
+  
+  # Optimizer settings
+  optim: "adamw_8bit"  # Memory-efficient optimizer
+  weight_decay: 0.01
+  lr_scheduler_type: "cosine"  # Better than linear for longer training
+  max_grad_norm: 0.3  # Gradient clipping
+  
+  # Mixed precision
+  fp16: true  # Use if CUDA available
+  bf16: false  # Use if Ampere+ GPU
+  
+  # Memory optimization
+  gradient_checkpointing: true
+  dataloader_pin_memory: false  # Set true if enough RAM
+  group_by_length: true  # Efficient batching
+
+dataset:
+  # Dataset configuration
+  modes:
+    conversational:
+      enabled: true
+      weight: 0.5  # 50% of training data
+      context_window: 5  # Messages for context
+      include_metadata: true
+      
+    adaptive:
+      enabled: true
+      weight: 0.25  # 25% for partner adaptation
+      analyze_styles: true
+      
+    burst_sequence:
+      enabled: true  
+      weight: 0.15  # 15% for burst patterns
+      burst_threshold_seconds: 120
+      
+    qa:
+      enabled: true
+      weight: 0.1  # 10% for Q&A pairs
+      
+  # Data processing
+  min_message_length: 5
+  max_examples: null  # Use all available data
+  deduplicate: true
+  shuffle: true
+  seed: 3407
+
+# Reasoning vs Chat configuration (Qwen3 specific)
+reasoning:
+  enabled: true
+  ratio: 0.25  # 25% reasoning data if available
+  # Inference settings for reasoning
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  enable_thinking: true  # Use <think> tags
+
+chat:
+  # Standard chat inference settings
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  enable_thinking: false
+
+# Twitter/media enhancement
+enhancement:
+  twitter:
+    enabled: true
+    use_nitter: true  # Privacy-preserving
+    cache_responses: true
+    
+  images:
+    enabled: true
+    vision_model: "gpt-4o-mini"  # or "claude-3-haiku"
+    max_images_per_conversation: 10
+
+# Multi-stage training
+stages:
+  - name: "base"
+    description: "General conversation patterns"
+    epochs: 1
+    learning_rate: 2e-5
+    
+  - name: "style_adaptation"  
+    description: "Personal style refinement"
+    epochs: 1
+    learning_rate: 1e-5
+    
+  - name: "partner_specific"
+    description: "Partner-specific adaptations"
+    epochs: 1
+    learning_rate: 5e-6
+
+# Output configuration
+output:
+  save_merged_16bit: false  # Save full model in 16-bit
+  save_merged_4bit: false  # Save full model in 4-bit
+  save_lora_only: true  # Default: just save adapters
+  push_to_hub: false
+  hub_model_id: null  # e.g., "username/astrabot-qwen3-14b"
+  
+  # GGUF export settings
+  gguf:
+    enabled: false
+    quantization_methods:
+      - "q4_k_m"  # Recommended
+      - "q5_k_m"  # Higher quality
+      - "q8_0"    # Fastest conversion
+
+# Logging and monitoring
+logging:
+  report_to: "none"  # Options: "wandb", "tensorboard", "none"
+  logging_dir: "./logs"
+  log_level: "info"
+  
+# Hardware optimization
+hardware:
+  # Automatically detected, but can override
+  use_flash_attention: false  # Enable if supported
+  torch_compile: false  # PyTorch 2.0+ optimization
+  
+# Validation
+validation:
+  # Validate training data before starting
+  check_data_quality: true
+  min_quality_score: 0.5
+  remove_empty_messages: true
+  validate_json_format: true

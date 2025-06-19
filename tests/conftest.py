@@ -289,6 +289,20 @@ def mock_spacy_nlp():
 
 
 @pytest.fixture
+def temp_data_dir(tmp_path):
+    """Create a temporary data directory structure for testing."""
+    # Create the Signal data structure
+    signal_dir = tmp_path / "raw" / "signal-flatfiles"
+    signal_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create processed directory
+    processed_dir = tmp_path / "processed"
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    
+    return tmp_path
+
+
+@pytest.fixture
 def temp_env_file():
     """Create a temporary .env file for testing."""
     env_content = """
