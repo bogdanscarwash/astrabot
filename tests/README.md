@@ -1,187 +1,296 @@
-# Astrabot Testing Guide
+# Astrabot Test Suite
 
-## Setup
-
-### With pyenv (Recommended)
-
-1. Ensure pyenv is installed and configured (see `docs/pyenv-setup.md`)
-2. Run the setup script:
-   ```bash
-   bash scripts/setup-environment.sh
-   ```
-
-### Manual Setup
-
-```bash
-# Set Python version with pyenv
-pyenv local 3.11.9
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-pip install pytest pytest-cov pytest-mock
-```
-
-## Running Tests
-
-### Using the Test Runner (Recommended)
-
-```bash
-# Run all tests
-./test_runner.py all
-
-# Run unit tests only
-./test_runner.py unit
-
-# Run with coverage
-./test_runner.py coverage
-
-# Run tests for specific module
-./test_runner.py schemas  # Test structured_schemas
-./test_runner.py utils    # Test conversation_utilities
-```
-
-### Using Make
-
-```bash
-# Run all tests
-make test
-
-# Run with coverage
-make test-coverage
-
-# Run specific test file
-make test-file
-# Then enter: test_conversation_utilities.py
-```
-
-### Using pytest directly
-
-```bash
-# Run all tests
-pytest
-
-# Run with verbose output
-pytest -v
-
-# Run specific test file
-pytest tests/test_structured_schemas.py
-
-# Run specific test
-pytest -k test_extract_tweet_text
-
-# Run with coverage
-pytest --cov=. --cov-report=html
-```
+This directory contains the comprehensive test suite for Astrabot, following Test-Driven Development (TDD) principles and best practices.
 
 ## Test Structure
 
 ```
 tests/
-├── __init__.py
-├── test_conversation_utilities.py  # Tests for tweet/image extraction
-├── test_structured_schemas.py      # Tests for data models
-└── README.md                       # This file
+├── README.md                    # This file
+├── conftest.py                  # Shared pytest fixtures and configuration
+├── fixtures/                    # Test data and mock responses
+│   ├── sample_signal_data.csv   # Sample Signal backup data
+│   ├── sample_recipients.csv    # Sample Signal recipients
+│   └── sample_tweet_responses.json # Mock Twitter/X responses
+├── integration/                 # Integration tests
+│   └── test_conversation_pipeline.py # End-to-end pipeline tests
+└── unit/                       # Unit tests
+    ├── test_conversation_analyzer.py   # Conversation analysis tests
+    ├── test_conversation_processor.py  # Core processing tests
+    ├── test_conversation_schemas.py    # Schema validation tests
+    ├── test_metadata_enricher.py      # Metadata enrichment tests
+    ├── test_qa_extractor.py           # Q&A extraction tests
+    ├── test_style_analyzer.py         # Communication style tests
+    ├── test_twitter_extractor.py      # Twitter/X extraction tests
+    ├── test_config.py                 # Configuration tests
+    ├── test_training_data_creator.py  # Training data creation tests
+    ├── test_adaptive_trainer.py       # Adaptive training tests
+    └── test_utils_logging.py          # Logging utility tests
 ```
 
-## Writing Tests
+## Running Tests
 
-### Test File Naming
-- Test files must start with `test_`
-- Test classes must start with `Test`
-- Test methods must start with `test_`
-
-### Example Test
-
-```python
-import unittest
-from conversation_utilities import extract_tweet_text
-
-class TestTweetExtraction(unittest.TestCase):
-    def test_extract_tweet_text(self):
-        url = "https://twitter.com/user/status/123"
-        result = extract_tweet_text(url)
-        self.assertIsNotNone(result)
+### All Tests
+```bash
+make test
 ```
 
-### Using Markers
+### Unit Tests Only
+```bash
+make test-unit
+```
+
+### Integration Tests (requires API keys)
+```bash
+make test-integration
+```
+
+### Coverage Report
+```bash
+make test-coverage
+```
+
+### Specific Test File
+```bash
+make test-file
+# Enter: tests/unit/test_conversation_processor.py
+```
+
+### Specific Test Function
+```bash
+make test-one
+# Enter: test_extract_tweet_content
+```
+
+### Quick Tests (no coverage)
+```bash
+make test-quick
+```
+
+## Test Markers
+
+Tests are organized using pytest markers:
+
+- `@pytest.mark.unit` - Fast unit tests with no external dependencies
+- `@pytest.mark.integration` - Integration tests requiring external services
+- `@pytest.mark.twitter` - Tests related to Twitter/X extraction
+- `@pytest.mark.llm` - Tests related to LLM training functionality
+- `@pytest.mark.requires_api` - Tests requiring API keys
+- `@pytest.mark.requires_signal_data` - Tests requiring Signal backup data
+- `@pytest.mark.slow` - Tests that take longer to run
+- `@pytest.mark.smoke` - Quick smoke tests for CI/CD
+
+### Running Specific Marker Groups
+```bash
+# Run only unit tests
+pytest -m unit
+
+# Run only Twitter-related tests
+pytest -m twitter
+
+# Run tests that don't require API keys
+pytest -m "not requires_api"
+
+# Run smoke tests for CI
+pytest -m smoke
+```
+
+## Test Configuration
+
+### pytest.ini
+- Configures test discovery patterns
+- Sets coverage thresholds (80% minimum)
+- Defines test markers
+- Configures logging for tests
+
+### .flake8
+- Linting configuration for test files
+- Excludes test-specific patterns
+- Allows test-specific imports
+
+### conftest.py
+- Shared fixtures across all tests
+- Mock configurations for external services
+- Sample data generators
+- Environment variable management
+
+## Test Data and Fixtures
+
+### Sample Data
+- `sample_signal_data.csv` - Realistic Signal message data
+- `sample_recipients.csv` - Sample Signal contact data
+- `sample_tweet_responses.json` - Mock Twitter API responses
+
+### Shared Fixtures
+- `sample_messages_df` - Pandas DataFrame with Signal messages
+- `sample_recipients_df` - Pandas DataFrame with Signal recipients
+- `sample_tweet_content` - Mock tweet content for testing
+- `mock_openai_client` - Mocked OpenAI API client
+- `mock_anthropic_client` - Mocked Anthropic API client
+- `temp_data_dir` - Temporary directory for test files
+
+## Environment Variables for Testing
+
+Create `.env.test` with test-specific values:
+
+```bash
+TESTING=true
+LOG_LEVEL=DEBUG
+YOUR_RECIPIENT_ID=2
+OPENAI_API_KEY=test_key_for_mocking
+ANTHROPIC_API_KEY=test_key_for_mocking
+```
+
+## Writing New Tests
+
+### Unit Test Template
 
 ```python
 import pytest
+from unittest.mock import Mock, patch
+
+from src.module.to_test import ClassToTest
 
 @pytest.mark.unit
-def test_simple_function():
-    assert 1 + 1 == 2
+class TestClassToTest:
+    """Test class functionality"""
+    
+    @pytest.fixture
+    def instance(self):
+        """Create instance for testing"""
+        return ClassToTest()
+    
+    def test_basic_functionality(self, instance):
+        """Test basic functionality"""
+        result = instance.method_to_test()
+        assert result is not None
+    
+    def test_edge_cases(self, instance):
+        """Test edge cases and error handling"""
+        with pytest.raises(ValueError):
+            instance.method_with_invalid_input(None)
+    
+    @patch('src.module.to_test.external_dependency')
+    def test_with_mocks(self, mock_dependency, instance):
+        """Test with mocked dependencies"""
+        mock_dependency.return_value = "mocked_response"
+        result = instance.method_using_dependency()
+        assert result == "expected_result"
+```
+
+### Integration Test Template
+
+```python
+import pytest
+from pathlib import Path
 
 @pytest.mark.integration
 @pytest.mark.requires_api
-def test_api_call():
-    # This test requires API keys
-    pass
-```
-
-## Mocking External Services
-
-Tests use mocks to avoid hitting external APIs:
-
-```python
-from unittest.mock import patch, MagicMock
-
-@patch('conversation_utilities.requests.get')
-def test_with_mock(mock_get):
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.content = b'<html>...</html>'
-    mock_get.return_value = mock_response
+class TestIntegrationScenario:
+    """Test integration scenarios"""
     
-    # Your test code here
+    def test_end_to_end_workflow(self, temp_data_dir):
+        """Test complete workflow"""
+        # Setup test data
+        # Run integration
+        # Verify results
+        pass
 ```
 
-## Coverage Reports
+## Test Coverage
 
-After running tests with coverage:
+Current coverage targets:
+- **Minimum**: 80% overall coverage
+- **Unit Tests**: >90% coverage for core modules
+- **Integration Tests**: Cover main user workflows
 
-```bash
-# Generate HTML report
-pytest --cov=. --cov-report=html
-
-# View report
-open htmlcov/index.html
-```
+### Coverage Exclusions
+- Test files themselves
+- `__init__.py` files
+- Development scripts
+- Notebooks and documentation
 
 ## Continuous Integration
 
-For CI/CD pipelines, use:
+Tests are automatically run on:
+- Pull requests
+- Main branch commits
+- Nightly builds (with external API tests)
 
-```bash
-# Run tests with XML output for CI
-pytest --junitxml=test-results.xml
+### CI Test Stages
+1. **Lint and Format** - Code quality checks
+2. **Unit Tests** - Fast tests without external dependencies
+3. **Integration Tests** - Full pipeline tests (if API keys available)
+4. **Coverage Report** - Ensure coverage thresholds are met
 
-# With coverage for CI
-pytest --cov=. --cov-report=xml
-```
+## Best Practices
+
+### Test Organization
+- One test file per source module
+- Group related tests in classes
+- Use descriptive test names
+- Include docstrings for complex tests
+
+### Test Data
+- Use fixtures for reusable test data
+- Keep test data minimal but realistic
+- Mock external services consistently
+
+### Assertions
+- Use specific assertions (not just `assert True`)
+- Test both positive and negative cases
+- Verify complete object state when needed
+
+### Performance
+- Keep unit tests fast (< 1 second each)
+- Use `@pytest.mark.slow` for longer tests
+- Mock time-consuming operations
+
+### Documentation
+- Document test purpose in docstrings
+- Explain complex test setups
+- Include examples of expected behavior
 
 ## Troubleshooting
 
-### Import Errors
+### Common Issues
 
-If you get import errors, ensure:
-1. You're in the project root directory
-2. The virtual environment is activated
-3. All dependencies are installed
+**Import Errors**
+- Ensure `conftest.py` is properly configured
+- Check `PYTHONPATH` includes project root
+- Verify module structure matches imports
 
-### API-Related Tests Failing
+**Fixture Not Found**
+- Check fixture is defined in `conftest.py` or test file
+- Verify fixture scope (function, class, module, session)
+- Ensure fixture name matches parameter name
 
-Some tests require API keys. Set them as environment variables:
-```bash
-export OPENAI_API_KEY="your-key-here"
-export ANTHROPIC_API_KEY="your-key-here"
-```
+**Mock Not Working**
+- Check patch target path is correct
+- Verify mock is applied before function call
+- Use `MagicMock` for complex objects
 
-Or skip API tests:
-```bash
-pytest -m "not requires_api"
-```
+**Tests Failing in CI**
+- Check environment variables are set
+- Verify external dependencies are mocked
+- Review CI-specific test markers
+
+### Getting Help
+
+1. Check test documentation in docstrings
+2. Review similar test patterns in codebase
+3. Consult pytest documentation
+4. Ask in project discussions/issues
+
+## Contributing
+
+When adding new functionality:
+
+1. **Write tests first** (TDD approach)
+2. **Test edge cases** and error conditions
+3. **Mock external dependencies** appropriately
+4. **Update fixtures** if needed for new test data
+5. **Add appropriate markers** for test categorization
+6. **Ensure coverage** meets project standards
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for more details on the development process.

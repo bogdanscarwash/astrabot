@@ -49,7 +49,7 @@ Conceptual guides explaining the why and how.
 
 ### Common Tasks
 - [Extract Signal backup data](how-to/process-signal-backup.md)
-- [Configure environment variables](environment-variables.md)
+- [Configure environment variables](reference/environment-variables.md)
 - [Set up development environment](CONTRIBUTING.md)
 - [Run tests](../tests/README.md)
 
@@ -57,8 +57,8 @@ Conceptual guides explaining the why and how.
 
 ### Development
 - **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute to Astrabot
-- **[Test-Driven Development](tdd-guide.md)** - TDD methodology and examples
-- **[Environment Setup](pyenv-setup.md)** - Python environment configuration
+- **[Test-Driven Development](explanation/tdd-guide.md)** - TDD methodology and examples
+- **[Environment Setup](how-to/pyenv-setup.md)** - Python environment configuration
 
 ### Project Information
 - **[Changelog](../CHANGELOG.md)** - Version history and updates

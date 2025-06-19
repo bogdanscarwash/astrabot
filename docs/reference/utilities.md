@@ -375,6 +375,6 @@ def describe_image(image_url):
 4. **Use batch processing** when configured
 
 ## See Also
-- [Environment Variables Guide](../environment-variables.md)
+- [Environment Variables Guide](environment-variables.md)
 - [Security Best Practices](../explanation/security.md)
 - [Testing Documentation](../../tests/README.md)
