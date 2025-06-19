@@ -24,7 +24,7 @@ from typing import Optional, Dict, List, Tuple
 import os
 import tempfile
 from datetime import datetime
-from src.models.conversation_schemas import (
+from structured_schemas import (
     ImageDescription, TweetContent, ImageWithContext, 
     BatchImageDescription, EnhancedMessage, Sentiment,
     generate_json_schema, IMAGE_DESCRIPTION_SCHEMA
@@ -32,7 +32,7 @@ from src.models.conversation_schemas import (
 
 # Import configuration
 try:
-    from src.utils.config import config
+    from config import config
 except ImportError:
     # Fallback if config.py is not available
     class Config:
