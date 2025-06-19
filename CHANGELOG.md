@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation index following Diátaxis framework**
 - **In-depth Signal CSV schema analysis with privacy levels**
 - **Data relationship diagrams and usage examples**
+- **Comprehensive Conversation Processing Guide with code examples**
+- **Privacy Architecture guide with security best practices**
+- **Enhanced TrainingDataCreator API reference with patterns and integration examples**
 
 ### Changed
 - Migrated from Q&A extraction to conversational training approach

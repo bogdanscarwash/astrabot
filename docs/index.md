@@ -16,6 +16,7 @@ Step-by-step guides to get you started with Astrabot.
 Practical guides for specific tasks.
 
 - **[Process Signal Backup](how-to/process-signal-backup.md)** - Extract data from Signal backups
+- **[Process Conversations](how-to/process-conversations.md)** - Transform conversations into training data
 - **[Deploy Your Model](how-to/deploy-model.md)** - Using your trained model in applications
 - **[Advanced Training](how-to/advanced-training.md)** - Fine-tuning techniques and optimization
 
@@ -31,7 +32,7 @@ Technical reference for APIs, schemas, and utilities.
 Conceptual guides explaining the why and how.
 
 - **[Architecture Overview](explanation/architecture.md)** - System design and components
-- **[Privacy Considerations](explanation/privacy-considerations.md)** - Security and data protection
+- **[Privacy Architecture](explanation/privacy-architecture.md)** - Comprehensive privacy and security guide
 - **[Communication Styles](explanation/communication-styles.md)** - How Astrabot learns your style
 
 ## Quick Links
