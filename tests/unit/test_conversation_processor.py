@@ -1,43 +1,38 @@
 """
-Unit tests for conversation_utilities module
+Unit tests for conversation processor module
 """
 
-import unittest
-from unittest.mock import patch, MagicMock
+import pytest
 import pandas as pd
 from datetime import datetime
-import sys
-import os
+from unittest.mock import patch, MagicMock
 
-# Add parent directory to path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from src.core.conversation_processor import (
-    extract_tweet_text,
-    inject_tweet_context,
-    extract_tweet_images,
-    process_message_with_twitter_content,
-    process_message_with_structured_content
-)
+from src.core.conversation_processor import ConversationProcessor
 from src.models.schemas import TweetContent, ImageDescription, EnhancedMessage
 
 
-class TestTweetExtraction(unittest.TestCase):
-    """Test tweet extraction functionality"""
+@pytest.mark.unit
+@pytest.mark.twitter
+class TestConversationProcessor:
+    """Test conversation processor functionality"""
     
-    def test_extract_tweet_text_with_valid_url(self):
-        """Test extracting tweet text from a valid URL"""
-        # Test with a known URL format
-        url = "https://twitter.com/user/status/123456789"
+    @pytest.fixture
+    def processor(self):
+        """Create processor instance"""
+        return ConversationProcessor()
+    
+    def test_extract_tweet_id_from_url(self, processor):
+        """Test extracting tweet ID from URL"""
+        urls_and_ids = [
+            ("https://twitter.com/user/status/123456789", "123456789"),
+            ("https://x.com/user/status/987654321", "987654321"),
+            ("https://twitter.com/user/status/123456789?s=20", "123456789"),
+            ("https://x.com/user/status/987654321/photo/1", "987654321"),
+        ]
         
-        # The function should at least parse the URL correctly
-        result = extract_tweet_text(url)
-        
-        # If no network connection or Nitter is down, it might return None
-        # But we can test the URL parsing logic
-        if result:
-            self.assertIn('tweet_id', result)
-            self.assertEqual(result['tweet_id'], '123456789')
+        for url, expected_id in urls_and_ids:
+            tweet_id = processor.extract_tweet_id_from_url(url)
+            assert tweet_id == expected_id
     
     def test_extract_tweet_text_structured(self):
         """Test structured tweet extraction"""

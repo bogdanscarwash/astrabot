@@ -2,7 +2,7 @@
 Unit tests for the centralized logging module.
 """
 
-import unittest
+import pytest
 import os
 import tempfile
 import json
@@ -12,10 +12,6 @@ from io import StringIO
 import logging as stdlib_logging
 import threading
 import time
-import sys
-
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.utils.logging import (
     AstrabotLogger,
@@ -28,7 +24,8 @@ from src.utils.logging import (
 )
 
 
-class TestAstrabotLogger(unittest.TestCase):
+@pytest.mark.unit
+class TestAstrabotLogger:
     """Test the AstrabotLogger class"""
     
     def setUp(self):

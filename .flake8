@@ -1,35 +1,57 @@
 [flake8]
+# Flake8 configuration for Astrabot
 max-line-length = 100
-select = E,W,F,C
+max-complexity = 10
+
+# Error codes to ignore
 ignore = 
-    E501,  # line too long (handled by black)
-    W503,  # line break before binary operator
-    E203,  # whitespace before ':' (conflicts with black)
-    C901,  # too complex
-    
+    # E203: Whitespace before ':' (conflicts with black)
+    E203,
+    # W503: Line break before binary operator (conflicts with black)
+    W503,
+    # E501: Line too long (handled by black)
+    E501,
+    # F401: Module imported but unused (common in __init__.py files)
+    F401
+
+# Directories to exclude from linting
 exclude = 
     .git,
     __pycache__,
-    .pytest_cache,
-    .mypy_cache,
     .venv,
     venv,
     build,
     dist,
     *.egg-info,
+    .pytest_cache,
+    .mypy_cache,
     notebooks,
-    docker,
-    data,
-    outputs
+    docker
 
+# Files to exclude
 per-file-ignores =
-    __init__.py:F401
-    tests/*:F401,F811
-    **/test_*.py:F401,F811
-    conftest.py:F401
-    
-max-complexity = 12
-doctests = True
-statistics = True
-count = True
+    # Allow unused imports in __init__.py files
+    __init__.py:F401,
+    # Allow longer lines in configuration files
+    conftest.py:E501,
+    # Allow star imports in test files
+    test_*.py:F403,F405
+
+# Select specific error codes to check
+select = 
+    E,  # pycodestyle errors
+    W,  # pycodestyle warnings
+    F,  # pyflakes
+    C,  # mccabe complexity
+
+# Show source code for each error
 show-source = True
+
+# Count errors and warnings
+count = True
+
+# Display statistics
+statistics = True
+
+# Format for error messages
+format = %(path)s:%(row)d:%(col)d: %(code)s %(text)s

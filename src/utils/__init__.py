@@ -14,6 +14,11 @@ from src.utils.logging import (
 )
 
 from src.utils.config import config, Config
+from src.utils.privacy_filter import (
+    PrivacyFilter,
+    PrivacyLevel,
+    classify_signal_data_privacy,
+)
 
 __all__ = [
     # Logging
@@ -26,4 +31,8 @@ __all__ = [
     # Configuration
     "config",
     "Config",
+    # Privacy
+    "PrivacyFilter",
+    "PrivacyLevel",
+    "classify_signal_data_privacy",
 ]
