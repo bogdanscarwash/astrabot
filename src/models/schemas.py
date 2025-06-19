@@ -12,16 +12,32 @@ from pydantic import BaseModel, Field
 
 
 class EmotionalTone(str, Enum):
-    """Emotional tone categories for images and content."""
-    ROMANTIC = "romantic"
+    """Emotional tone categories based on actual Signal conversation patterns."""
+    # Core emotions from analysis
     HUMOROUS = "humorous"
     SERIOUS = "serious"
+    CONTEMPLATIVE = "contemplative"
+    HAPPY = "happy"
     SAD = "sad"
     ANGRY = "angry"
-    CONTEMPLATIVE = "contemplative"
-    SLEEPY = "sleepy"
-    HAPPY = "happy"
     ANXIOUS = "anxious"
+    
+    # Additional tones found in Signal data
+    SARCASTIC = "sarcastic"
+    PHILOSOPHICAL = "philosophical"
+    PLAYFUL = "playful"
+    TEASING = "teasing"
+    INTELLECTUAL = "intellectual"
+    MOCKING = "mocking"
+    AFFECTIONATE = "affectionate"
+    POLITICAL = "political"
+    ANALYTICAL = "analytical"
+    CASUAL = "casual"
+    FLIRTATIOUS = "flirtatious"
+    
+    # Legacy tones (keep for backward compatibility)
+    ROMANTIC = "romantic"
+    SLEEPY = "sleepy"
     BORED = "bored"
     SENTIMENTAL = "sentimental"
     SENSITIVE = "sensitive"
@@ -34,6 +50,57 @@ class Sentiment(str, Enum):
     NEGATIVE = "negative"
     NEUTRAL = "neutral"
     MIXED = "mixed"
+    SARCASTIC = "sarcastic"
+    EXCITED = "excited"
+    FRUSTRATED = "frustrated"
+
+
+class ConversationMood(str, Enum):
+    """Overall mood/energy of conversation based on Signal data patterns."""
+    RELAXED = "relaxed"
+    INTENSE = "intense"
+    PLAYFUL = "playful"
+    SERIOUS = "serious"
+    FLIRTY = "flirty"
+    PHILOSOPHICAL = "philosophical"
+    CASUAL = "casual"
+    HEATED = "heated"
+    SUPPORTIVE = "supportive"
+    HUMOROUS = "humorous"
+
+
+class MessageType(str, Enum):
+    """Types of messages based on conversation patterns."""
+    STANDALONE = "standalone"
+    CONTINUATION = "continuation"
+    CORRECTION = "correction"
+    ELABORATION = "elaboration"
+    RESPONSE = "response"
+    BURST_START = "burst_start"
+    BURST_MIDDLE = "burst_middle"
+    BURST_END = "burst_end"
+    MEDIA_SHARE = "media_share"
+    TANGENT = "tangent"
+
+
+class TopicCategory(str, Enum):
+    """Topic categories based on actual Signal conversation analysis."""
+    POLITICS = "politics"
+    POLITICAL_THEORY = "political_theory"
+    CURRENT_EVENTS = "current_events"
+    FOOD = "food"
+    PERSONAL_LIFE = "personal_life"
+    MEMES = "memes"
+    ACADEMIC = "academic"
+    TECHNOLOGY = "technology"
+    RELATIONSHIPS = "relationships"
+    WORK = "work"
+    HUMOR = "humor"
+    PHILOSOPHY = "philosophy"
+    SOCIAL_MEDIA = "social_media"
+    NEWS = "news"
+    ENTERTAINMENT = "entertainment"
+    OTHER = "other"
 
 
 class ImageDescription(BaseModel):
@@ -128,6 +195,48 @@ class EnhancedMessage(BaseModel):
         return enhanced
 
 
+class EmojiUsagePattern(BaseModel):
+    """Pattern for emoji usage and emotional expression."""
+    emoji: str = Field(description="The emoji character")
+    frequency: int = Field(description="How often this emoji is used")
+    emotional_category: str = Field(description="Emotional category (joy, love, frustration, etc.)")
+    usage_context: str = Field(description="Typical usage context (standalone, end_message, emphasis, etc.)")
+    sender_signature: bool = Field(default=False, description="Whether this is a signature emoji for the sender")
+
+
+class BurstSequence(BaseModel):
+    """Sequence of rapid-fire messages sent close together."""
+    messages: List[str] = Field(description="Messages in the burst sequence")
+    duration_seconds: float = Field(description="Time span of the burst sequence")
+    message_count: int = Field(description="Number of messages in burst")
+    avg_message_length: float = Field(description="Average length of messages in burst")
+    contains_corrections: bool = Field(default=False, description="Whether burst contains message corrections")
+    topic_category: Optional[TopicCategory] = Field(None, description="Primary topic of the burst")
+    emotional_tone: EmotionalTone = Field(description="Overall emotional tone of burst")
+
+
+class TopicTransition(BaseModel):
+    """Tracking how conversations shift between topics."""
+    from_topic: TopicCategory = Field(description="Previous topic")
+    to_topic: TopicCategory = Field(description="New topic")
+    transition_method: str = Field(description="How topic changed (abrupt, gradual, media_triggered, etc.)")
+    trigger_message: Optional[str] = Field(None, description="Message that triggered the transition")
+    transition_smoothness: float = Field(description="How smooth the transition was (0-1)")
+
+
+class PersonalityMarkers(BaseModel):
+    """Individual communication quirks and style markers."""
+    sender_id: str = Field(description="ID of the sender")
+    signature_phrases: List[str] = Field(description="Commonly used phrases or expressions")
+    emoji_preferences: List[EmojiUsagePattern] = Field(description="Preferred emojis and usage patterns")
+    message_style: str = Field(description="Overall messaging style (burst, long-form, concise, etc.)")
+    humor_type: str = Field(description="Type of humor used (sarcastic, meme-heavy, wordplay, etc.)")
+    academic_tendency: float = Field(description="Tendency to use academic/formal language (0-1)")
+    profanity_usage: float = Field(description="Frequency of profanity usage (0-1)")
+    political_engagement: float = Field(description="Level of political discussion engagement (0-1)")
+    response_speed_preference: str = Field(description="Typical response timing (immediate, quick, delayed)")
+
+
 def generate_json_schema(model: BaseModel) -> Dict[str, Any]:
     """
     Generate OpenAI-compatible JSON schema from a Pydantic model.
@@ -170,3 +279,6 @@ def generate_json_schema(model: BaseModel) -> Dict[str, Any]:
 IMAGE_DESCRIPTION_SCHEMA = generate_json_schema(ImageDescription)
 TWEET_CONTENT_SCHEMA = generate_json_schema(TweetContent)
 BATCH_IMAGE_DESCRIPTION_SCHEMA = generate_json_schema(BatchImageDescription)
+EMOJI_USAGE_PATTERN_SCHEMA = generate_json_schema(EmojiUsagePattern)
+BURST_SEQUENCE_SCHEMA = generate_json_schema(BurstSequence)
+PERSONALITY_MARKERS_SCHEMA = generate_json_schema(PersonalityMarkers)

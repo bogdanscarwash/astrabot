@@ -518,4 +518,4 @@ After processing your conversations:
 
 - [Signal Data Schema Reference](../reference/signal-data-schema.md)
 - [TrainingDataCreator API](../reference/api/training-data-creator.md)
-- [Architecture Overview](../explanation/architecture.md)
+- [Architecture Overview](../explanation/architecture.md)                                                       │

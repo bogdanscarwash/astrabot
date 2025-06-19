@@ -61,6 +61,21 @@ test-integration:
 	@echo "Running integration tests (requires API keys in .env)..."
 	pytest -m integration
 
+# Run privacy filter tests
+test-privacy:
+	@echo "Running privacy filter tests..."
+	pytest -m privacy -v
+
+# Run performance tests
+test-performance:
+	@echo "Running performance tests..."
+	pytest -m slow -v
+
+# Run all privacy-related tests (unit + integration)
+test-privacy-full:
+	@echo "Running comprehensive privacy tests..."
+	pytest -m "privacy or (unit and privacy)" -v
+
 # Run tests with coverage
 test-coverage:
 	pytest --cov=src --cov-report=html --cov-report=term-missing
