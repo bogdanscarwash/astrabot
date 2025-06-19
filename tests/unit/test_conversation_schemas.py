@@ -11,7 +11,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.models.conversation_schemas import (
+from src.models.schemas import (
     EmotionalTone, Sentiment, ImageDescription, TweetContent,
     ImageWithContext, BatchImageDescription, EnhancedMessage,
     generate_json_schema
@@ -23,10 +23,11 @@ class TestEnums(unittest.TestCase):
     
     def test_emotional_tone_values(self):
         """Test EmotionalTone enum values"""
-        self.assertEqual(EmotionalTone.POSITIVE, "positive")
-        self.assertEqual(EmotionalTone.NEGATIVE, "negative")
-        self.assertEqual(EmotionalTone.NEUTRAL, "neutral")
         self.assertEqual(EmotionalTone.HUMOROUS, "humorous")
+        self.assertEqual(EmotionalTone.SERIOUS, "serious")
+        self.assertEqual(EmotionalTone.CONTEMPLATIVE, "contemplative")
+        self.assertEqual(EmotionalTone.HAPPY, "happy")
+        self.assertEqual(EmotionalTone.PLAYFUL, "playful")
         
         # Test all values are strings
         for tone in EmotionalTone:
@@ -49,20 +50,20 @@ class TestImageDescription(unittest.TestCase):
             description="A beautiful sunset over the ocean",
             detected_text="Sunset 2024",
             main_subjects=["sunset", "ocean", "sky"],
-            emotional_tone=EmotionalTone.POSITIVE
+            emotional_tone=EmotionalTone.HAPPY
         )
         
         self.assertEqual(desc.description, "A beautiful sunset over the ocean")
         self.assertEqual(desc.detected_text, "Sunset 2024")
         self.assertEqual(len(desc.main_subjects), 3)
-        self.assertEqual(desc.emotional_tone, EmotionalTone.POSITIVE)
+        self.assertEqual(desc.emotional_tone, EmotionalTone.HAPPY)
     
     def test_image_description_minimal(self):
         """Test creating ImageDescription with minimal data"""
         desc = ImageDescription(
             description="Test image",
             main_subjects=[],
-            emotional_tone=EmotionalTone.NEUTRAL
+            emotional_tone=EmotionalTone.CONTEMPLATIVE
         )
         
         self.assertIsNone(desc.detected_text)
@@ -74,7 +75,7 @@ class TestImageDescription(unittest.TestCase):
             description="A cat sleeping",
             detected_text="Sweet dreams",
             main_subjects=["cat", "bed"],
-            emotional_tone=EmotionalTone.POSITIVE
+            emotional_tone=EmotionalTone.HAPPY
         )
         
         training_format = desc.to_training_format()
@@ -181,7 +182,7 @@ class TestBatchImageDescription(unittest.TestCase):
             description="A test image",
             detected_text="Test",
             main_subjects=["test"],
-            emotional_tone=EmotionalTone.NEUTRAL
+            emotional_tone=EmotionalTone.CONTEMPLATIVE
         )
         
         batch = BatchImageDescription(
@@ -209,7 +210,7 @@ class TestBatchImageDescription(unittest.TestCase):
             description="A beautiful landscape",
             detected_text=None,
             main_subjects=["mountains", "lake"],
-            emotional_tone=EmotionalTone.POSITIVE
+            emotional_tone=EmotionalTone.HAPPY
         )
         
         batch = BatchImageDescription(
@@ -252,7 +253,7 @@ class TestEnhancedMessage(unittest.TestCase):
         img_desc = ImageDescription(
             description="Test image",
             main_subjects=["test"],
-            emotional_tone=EmotionalTone.NEUTRAL
+            emotional_tone=EmotionalTone.CONTEMPLATIVE
         )
         
         enhanced = EnhancedMessage(

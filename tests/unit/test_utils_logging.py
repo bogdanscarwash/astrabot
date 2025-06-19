@@ -3,6 +3,7 @@ Unit tests for the centralized logging module.
 """
 
 import pytest
+import unittest
 import os
 import tempfile
 import json

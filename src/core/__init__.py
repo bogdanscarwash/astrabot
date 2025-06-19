@@ -51,11 +51,12 @@ from src.core.style_analyzer import (
 )
 
 # Import Q&A extractor functions
-from src.core.qa_extractor import (
-    extract_qa_pairs_enhanced,
-    extract_qa_pairs_with_quality_filters,
-    analyze_qa_patterns
-)
+# TODO: Implement qa_extractor.py
+# from src.core.qa_extractor import (
+#     extract_qa_pairs_enhanced,
+#     extract_qa_pairs_with_quality_filters,
+#     analyze_qa_patterns
+# )
 
 __all__ = [
     # Conversation analyzer
@@ -96,7 +97,8 @@ __all__ = [
     "analyze_your_adaptation_patterns",
     
     # Q&A extractor
-    "extract_qa_pairs_enhanced",
-    "extract_qa_pairs_with_quality_filters",
-    "analyze_qa_patterns"
+    # TODO: Add back when qa_extractor.py is implemented
+    # "extract_qa_pairs_enhanced",
+    # "extract_qa_pairs_with_quality_filters",
+    # "analyze_qa_patterns"
 ]

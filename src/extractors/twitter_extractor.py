@@ -24,7 +24,7 @@ from typing import Optional, Dict, List, Tuple
 import os
 import tempfile
 from datetime import datetime
-from src.models.conversation_schemas import (
+from src.models.schemas import (
     ImageDescription, TweetContent, ImageWithContext, 
     BatchImageDescription, EnhancedMessage, Sentiment,
     generate_json_schema, IMAGE_DESCRIPTION_SCHEMA
