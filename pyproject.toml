@@ -7,7 +7,7 @@ name = "astrabot"
 version = "0.1.0"
 description = "Personal AI fine-tuning using Signal conversation history"
 readme = "README.md"
-requires-python = "3.13"
+requires-python = ">=3.9,<3.13"
 license = {text = "MIT"}
 authors = [
     {name = "persephone raskova", email = "icegoddess69420@proton.me"},
@@ -99,36 +99,78 @@ extend-exclude = '''
 '''
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
 exclude = [
-    "venv/",
-    ".venv/",
-    "tests/",
+    "^venv/",
+    "^.venv/",
+    "^build/",
+    "^dist/",
+    "^tests/",
+    "^notebooks/",
+    "^data/",
+    "^outputs/",
+    "^docker/",
 ]
+mypy_path = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-ra -q --strict-markers"
+addopts = "-ra -q --strict-markers --tb=short"
 markers = [
-    "unit: Unit tests",
-    "integration: Integration tests",
-    "slow: Slow tests",
+    "unit: Unit tests (fast, no external dependencies)",
+    "integration: Integration tests requiring external services",
+    "slow: Tests that take a long time to run",
+    "requires_api: Tests that require API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY)",
+    "requires_signal_data: Tests that require Signal backup data",
+    "twitter: Tests related to Twitter/X extraction functionality",
+    "llm: Tests related to LLM training functionality",
+    "smoke: Quick smoke tests for CI/CD pipeline",
+    "privacy: Privacy filter tests",
+]
+norecursedirs = [
+    ".git",
+    ".tox",
+    "dist",
+    "build",
+    "*.egg",
+    "venv",
+    ".venv",
+    "data",
+    "outputs",
+    "notebooks",
+    "docker",
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+timeout = 300
+timeout_method = "thread"
+env = [
+    "TESTING = true",
+    "LOG_LEVEL = DEBUG",
 ]
 
 [tool.coverage.run]
 source = ["src"]
 omit = [
     "*/tests/*",
-    "*/__init__.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
     "*/venv/*",
     "*/.venv/*",
+    "*/dist/*",
+    "*/build/*",
+    "*/.pytest_cache/*",
+    "*/htmlcov/*",
+    "src/llm/prompts/*",
 ]
 
 [tool.coverage.report]
@@ -138,19 +180,67 @@ skip_covered = false
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
+    "def __str__",
     "raise AssertionError",
     "raise NotImplementedError",
-    "if 0:",
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
-    "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
+    "class .*\\bProtocol\\):",
+    "\\.\\.\\.$",
 ]
 
+[tool.flake8]
+max-line-length = 100
+max-complexity = 10
+ignore = [
+    "E203",  # whitespace before ':' (conflicts with black)
+    "E266",  # too many leading '#' for block comment
+    "W503",  # line break before binary operator (conflicts with black)
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".pytest_cache",
+    ".mypy_cache",
+    "notebooks",
+    "docker",
+    "data",
+    "outputs",
+]
+per-file-ignores = [
+    "__init__.py:F401",
+    "tests/*:F401,F811,F403,F405",
+    "conftest.py:E501",
+]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "C",  # mccabe complexity
+]
+show-source = true
+count = true
+statistics = true
+format = "%(path)s:%(row)d:%(col)d: %(code)s %(text)s"
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_glob = ["*/venv/*", "*/.venv/*", "*/migrations/*"]
+known_first_party = ["src", "core", "extractors", "llm", "models", "utils"]
+src_paths = ["src", "tests"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 100
 select = [
     "E",  # pycodestyle errors
@@ -170,3 +260,18 @@ ignore = [
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.8.5",
+    "black>=25.1.0",
+    "detect-secrets>=1.5.0",
+    "flake8>=7.2.0",
+    "isort>=6.0.1",
+    "mypy>=1.16.1",
+    "pre-commit>=4.2.0",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-mock>=3.14.1",
+    "pytest-watch>=4.2.0",
+]
