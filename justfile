@@ -12,7 +12,7 @@ help:
     @echo "Setup:"
     @echo "  just install         Install production dependencies"
     @echo "  just install-dev     Install all dependencies including dev tools"
-    @echo "  just setup-env       Set up development environment"
+    @echo "  just setup-env       Set up development environment (interactive)"
     @echo ""
     @echo "Testing:"
     @echo "  just test           Run all tests"
@@ -237,7 +237,7 @@ train-qwen3-test:
 # Development environment setup
 setup-env:
     @echo "Setting up development environment..."
-    bash scripts/setup-environment.sh
+    bash scripts/setup/bootstrap.sh
     cp .env.example .env
     @echo "✓ Environment setup complete. Please edit .env with your API keys."
 
@@ -250,3 +250,7 @@ docs:
     @echo "Generating documentation..."
     cd docs && make html
     @echo "✓ Documentation generated in docs/_build/html/"
+
+# Setup secrets interactively
+setup-secrets:
+    python scripts/setup/setup-secrets.py

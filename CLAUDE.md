@@ -11,36 +11,42 @@ Astrabot is a personal AI fine-tuning project that creates language models mimic
 ### Testing
 ```bash
 # Run all tests
-make test
+just test
 
 # Run specific test file
-make test-file
+just test-file
 # Then enter: tests/unit/test_conversation_processor.py
 
 # Run tests with coverage
-make test-coverage
+just test-coverage
 
 # Run a specific test by name
-make test-one
+just test-one
 # Then enter: test_extract_tweet_text
 
 # Run only unit tests
-make test-unit
+just test-unit
 
 # Run integration tests (requires API keys in .env)
-make test-integration
+just test-integration
 ```
 
 ### Code Quality
 ```bash
 # Format code with black
-make format
+just format
 
 # Run linting (flake8 + mypy)
-make lint
+just lint
+
+# Type checking
+just type-check
+
+# Run all quality checks
+just all
 
 # Clean up cache and generated files
-make clean
+just clean
 ```
 
 ### Signal Backup Processing
@@ -67,16 +73,20 @@ python scripts/process_signal_data.py --input data/raw/signal-flatfiles --output
 
 ### Environment Setup
 ```bash
-# Install all dependencies including dev tools
-pip install -e ".[dev,vision]"
+# Run the bootstrap script (now in scripts/setup/)
+bash scripts/setup/bootstrap.sh
+
+# This will:
+# - Check Python 3.9+ requirement
+# - Install uv package manager
+# - Install all dependencies in .venv
+# - Set up pre-commit hooks
 
 # Set up environment variables
+python scripts/setup/setup-secrets.py
+# Or manually:
 cp .env.example .env
 # Edit .env with your API keys
-
-# Run setup scripts
-bash scripts/setup-environment.sh
-python scripts/setup-secrets.py
 ```
 
 ## Architecture and Key Components
@@ -100,6 +110,12 @@ src/
 └── utils/                  # Utilities
     ├── config.py                # Environment-based configuration
     └── logging.py               # Security-aware logging with masking
+
+scripts/
+├── setup/                  # Setup and installation scripts
+│   ├── bootstrap.sh            # Main setup script using uv
+│   └── setup-secrets.py        # Interactive API key configuration
+└── old-analysis/          # Archived analysis scripts
 ```
 
 ### Data Processing Flow
@@ -154,15 +170,18 @@ src/
 - Mock external API calls for unit tests
 
 #### Configuration
+- **Single dependency source**: `pyproject.toml` (no requirements.txt)
+- **Package management**: `uv` for fast, reliable dependency resolution
 - Environment variables via `.env` file (never commit!)
 - Key variables:
   - `OPENAI_API_KEY`: GPT-4o-mini for images
   - `ANTHROPIC_API_KEY`: Alternative vision API
   - `YOUR_RECIPIENT_ID`: Your Signal ID (usually 2)
   - `HF_TOKEN`: For model uploads
-  
-#### Current Refactoring
-- Migration from monolithic `notebook.ipynb` to modular `src/` structure
-- New command-line interface via `scripts/train.py`
-- Improved documentation following Diátaxis framework
-- Enhanced error handling and logging throughout
+
+#### Current Architecture Notes
+- Migrated from monolithic notebooks to modular `src/` structure
+- Command-line interface via `scripts/train.py`
+- Documentation follows Diátaxis framework
+- All setup consolidated to single bootstrap script
+- Uses modern Python packaging (pyproject.toml + uv)

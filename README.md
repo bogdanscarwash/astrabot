@@ -24,7 +24,7 @@ Astrabot uses your Signal messenger backup to create a personalized AI that comm
 - Docker (for Signal backup processing)
 - CUDA-capable GPU (recommended for training)
 - Signal backup file (.backup)
-- `just` task runner (optional but recommended - see installation below)
+- `just` task runner (optional but recommended)
 
 ### Installation
 
@@ -34,28 +34,24 @@ git clone https://github.com/yourusername/astrabot.git
 cd astrabot
 ```
 
-2. **One-command setup** (recommended):
+2. **Run the bootstrap script**:
 ```bash
-bash scripts/bootstrap.sh
+bash scripts/setup/bootstrap.sh
 ```
 
 This bootstrap script will:
 - Check Python version (3.9+ required)
 - Install `uv` package manager if not present
-- Install all dependencies in a virtual environment
+- Create and configure a virtual environment
+- Install all dependencies
 - Set up pre-commit hooks
 - Verify the installation
 
-3. **Manual setup** (alternative):
+3. **Configure environment variables**:
 ```bash
-# Install uv package manager (if not installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install dependencies
-uv sync
-
-# Install pre-commit hooks
-source .venv/bin/activate && pre-commit install
+# Copy example and edit with your API keys
+cp .env.example .env
+nano .env
 ```
 
 4. **Install just task runner** (optional but recommended):
@@ -63,12 +59,7 @@ source .venv/bin/activate && pre-commit install
 curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin
 ```
 
-5. Configure environment variables:
-```bash
-# Copy example and edit with your API keys
-cp .env.example .env
-nano .env
-```
+That's it! The project uses modern Python packaging with `pyproject.toml` and the `uv` package manager for fast, reliable dependency management.
 
 ## Development Workflow
 
@@ -80,7 +71,6 @@ nano .env
 # Setup
 just install         # Install production dependencies
 just install-dev     # Install all dependencies including dev tools
-just setup-env       # Set up development environment
 
 # Testing
 just test           # Run all tests
@@ -198,6 +188,10 @@ astrabot/
 │   │   └── conversation_schemas.py   # Conversation models
 │   └── utils/             # Utilities (logging, config)
 ├── scripts/               # Command-line scripts
+│   ├── setup/            # Setup and installation scripts
+│   │   ├── bootstrap.sh           # Main setup script
+│   │   └── setup-secrets.py       # API key configuration
+│   └── old-analysis/     # Legacy analysis scripts
 ├── notebooks/             # Jupyter notebooks
 ├── tests/                 # Test suite
 │   ├── unit/             # Unit tests
@@ -301,50 +295,10 @@ just pre-commit
 This is a personal project, but if you'd like to contribute:
 1. Fork the repository
 2. Create a feature branch
-3. Run `bash scripts/bootstrap.sh` to set up your environment
+3. Run `bash scripts/setup/bootstrap.sh` to set up your environment
 4. Make your changes with tests
 5. Run `just all` to ensure code quality
 6. Submit a pull request
-
-## Migration Guide
-
-**For existing developers upgrading from the old Makefile system:**
-
-1. **Run the bootstrap script** to set up the new environment:
-   ```bash
-   bash scripts/bootstrap.sh
-   ```
-
-2. **Command equivalents** - all your familiar commands work the same:
-   ```bash
-   # Old Makefile → New just commands
-   make install      → just install
-   make test         → just test
-   make lint         → just lint
-   make format       → just format
-   make all          → just all
-   make clean        → just clean
-   ```
-
-3. **New features available**:
-   ```bash
-   just uv-add package-name    # Add dependencies easily
-   just test-watch            # Auto-rerun tests on changes
-   just train-qwen3-small     # Quick model testing
-   ```
-
-4. **What changed**:
-   - Dependencies now managed with `uv` (faster, more reliable)
-   - All tool configurations consolidated in `pyproject.toml`
-   - Pre-commit hooks automatically configured
-   - Python 3.9+ now required (was 3.8+)
-
-5. **If you prefer the old way**: All commands still work directly:
-   ```bash
-   source .venv/bin/activate
-   pytest  # instead of just test
-   black src/ tests/  # instead of just format
-   ```
 
 ## License
 

@@ -18,7 +18,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -40,21 +39,36 @@ dependencies = [
     "scikit-learn>=1.3.0",
     "scipy>=1.11.0",
     "torch>=2.0.0",
+    "torchaudio>=2.0.0",
+    "torchvision>=0.15.0",
     "transformers>=4.30.0",
     "trl>=0.7.0",
     "unsloth @ git+https://github.com/unslothai/unsloth.git",
+    "ipykernel>=6.29.0",
+    "matplotlib-inline>=0.1.6",
+    "pillow>=10.0.0",
+    "psutil>=5.9.0",
+    "tqdm>=4.65.0",
+    "huggingface-hub>=0.20.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "black>=23.0.0",
     "flake8>=6.0.0",
+    "flake8-docstrings>=1.7.0",
+    "flake8-bugbear>=24.0.0",
     "mypy>=1.5.0",
     "pre-commit>=3.4.0",
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.11.0",
     "pytest-watch>=4.2.0",
+    "isort>=5.13.0",
+    "bandit>=1.7.0",
+    "detect-secrets>=1.5.0",
+    "types-requests>=2.31.0",
+    "types-PyYAML>=6.0.0",
 ]
 
 vision = [
@@ -62,14 +76,17 @@ vision = [
     "anthropic>=0.7.0",
 ]
 
+cuda118 = [
+    "torch==2.7.1+cu118",
+    "torchaudio==2.7.1+cu118",
+    "torchvision==0.22.1+cu118",
+]
+
 [project.urls]
 Homepage = "https://github.com/yourusername/astrabot"
 Documentation = "https://github.com/yourusername/astrabot/wiki"
 Repository = "https://github.com/yourusername/astrabot.git"
 Issues = "https://github.com/yourusername/astrabot/issues"
-
-# [project.scripts]
-# astrabot = "src.cli:main"  # Uncomment when CLI module is implemented
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -81,11 +98,10 @@ astrabot = ["templates/*", "configs/*.yaml"]
 
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py39', 'py310', 'py311']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
-  # directories
   \.eggs
   | \.git
   | \.hg
@@ -189,47 +205,6 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "\\.\\.\\.$",
 ]
-
-[tool.flake8]
-max-line-length = 100
-max-complexity = 10
-ignore = [
-    "E203",  # whitespace before ':' (conflicts with black)
-    "E266",  # too many leading '#' for block comment
-    "W503",  # line break before binary operator (conflicts with black)
-    "E501",  # line too long (handled by black)
-    "B008",  # do not perform function calls in argument defaults
-]
-exclude = [
-    ".git",
-    "__pycache__",
-    ".venv",
-    "venv",
-    "build",
-    "dist",
-    "*.egg-info",
-    ".pytest_cache",
-    ".mypy_cache",
-    "notebooks",
-    "docker",
-    "data",
-    "outputs",
-]
-per-file-ignores = [
-    "__init__.py:F401",
-    "tests/*:F401,F811,F403,F405",
-    "conftest.py:E501",
-]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "C",  # mccabe complexity
-]
-show-source = true
-count = true
-statistics = true
-format = "%(path)s:%(row)d:%(col)d: %(code)s %(text)s"
 
 [tool.isort]
 profile = "black"
