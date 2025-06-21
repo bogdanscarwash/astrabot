@@ -7,7 +7,6 @@ Usage:
 """
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -21,9 +20,7 @@ logger = get_logger(__name__)
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Process Signal data and create training dataset"
-    )
+    parser = argparse.ArgumentParser(description="Process Signal data and create training dataset")
     parser.add_argument(
         "--input",
         type=str,
@@ -65,6 +62,7 @@ def main():
     # Set up logging
     if args.verbose:
         import logging
+
         get_logger().setLevel(logging.DEBUG)
 
     # Validate input directory
@@ -94,10 +92,10 @@ def main():
     logger.info(f"Input directory: {input_path}")
     logger.info(f"Output path: {output_path}")
     logger.info(f"Your recipient ID: {args.recipient_id}")
-    
+
     if args.max_examples:
         logger.info(f"Max examples: {args.max_examples}")
-    
+
     if args.no_twitter:
         logger.info("Twitter content extraction: DISABLED")
 
@@ -115,7 +113,7 @@ def main():
             logger.info("✅ Processing complete!")
             logger.info(f"Created {result['total_examples']} training examples")
             logger.info(f"Output saved to: {result['output_path']}")
-            
+
             # Show style analysis
             style = result["style_analysis"]
             logger.info("\n📊 Your Communication Style:")
@@ -131,6 +129,7 @@ def main():
         logger.error(f"❌ Unexpected error: {str(e)}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

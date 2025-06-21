@@ -1,6 +1,10 @@
-# Pyenv Setup Guide for Astrabot
+# Setup Guide for Astrabot
 
-This guide explains how to set up pyenv for the Astrabot project on Debian 12.
+This guide explains how to set up pyenv for the Astrabot project on Debian 12 and other systems.
+
+## Why Pyenv?
+
+Pyenv allows you to easily switch between multiple versions of Python and ensures consistent development environments across different systems.
 
 ## Installing pyenv on Debian 12
 
@@ -31,11 +35,43 @@ source ~/.bashrc
 pyenv install 3.11.9
 
 # Set local Python version for the project
-cd /home/percy/git/astrabot
+cd /path/to/astrabot
 pyenv local 3.11.9
 
 # Verify
 python --version  # Should show Python 3.11.9
+```
+
+## Modern Setup with UV
+
+Astrabot now uses `uv` for fast, reliable package management. The bootstrap script handles everything:
+
+```bash
+# Run the bootstrap script
+bash scripts/setup/bootstrap.sh
+```
+
+This will:
+
+1. Check Python version (3.9+ required)
+2. Install `uv` package manager
+3. Create a virtual environment in `.venv`
+4. Install all dependencies from `pyproject.toml`
+5. Set up pre-commit hooks
+
+## Manual Virtual Environment (Alternative)
+
+If you prefer traditional venv:
+
+```bash
+# Create a virtual environment
+python -m venv .venv
+
+# Activate it
+source .venv/bin/activate
+
+# Install using uv
+uv sync
 ```
 
 ## Shebang Lines in Scripts
@@ -48,26 +84,13 @@ All Python scripts in this project use the pyenv-compatible shebang:
 
 This ensures the script uses the Python version managed by pyenv.
 
-## Virtual Environment (Optional but Recommended)
-
-```bash
-# Create a virtual environment specific to this project
-python -m venv venv
-
-# Activate it
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
 ## Making Scripts Executable
 
 ```bash
-# Make Python scripts executable
-chmod +x test_runner.py
-chmod +x test_conversation_utilities.py
-chmod +x test_structured_outputs.py
+# Example scripts
+chmod +x scripts/train.py
+chmod +x scripts/process_signal_data.py
+chmod +x scripts/setup/setup-secrets.py
 ```
 
 ## Running Scripts
@@ -75,15 +98,30 @@ chmod +x test_structured_outputs.py
 With pyenv properly configured, you can run scripts directly:
 
 ```bash
-./test_runner.py all
-./test_conversation_utilities.py
+./scripts/train.py --help
+./scripts/setup/setup-secrets.py
 ```
 
 Or use Python explicitly:
 
 ```bash
-python test_runner.py all
-python test_conversation_utilities.py
+python scripts/train.py --config configs/training_config.yaml
+```
+
+## Using Just Task Runner
+
+For the best development experience, install `just`:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin
+```
+
+Then use simple commands:
+
+```bash
+just test        # Run tests
+just format      # Format code
+just train       # Start training
 ```
 
 ## Troubleshooting
@@ -91,12 +129,14 @@ python test_conversation_utilities.py
 ### Script uses system Python instead of pyenv Python
 
 1. Check your PATH:
+
    ```bash
    echo $PATH
    which python3
    ```
 
 2. Ensure pyenv is initialized:
+
    ```bash
    pyenv init
    ```
@@ -111,9 +151,25 @@ chmod +x script_name.py
 
 ### Module not found errors
 
-Ensure you're in the correct directory and have installed requirements:
+Ensure you're in the correct directory and have run the setup:
 
 ```bash
-cd /home/percy/git/astrabot
-pip install -r requirements.txt
+cd /path/to/astrabot
+bash scripts/setup/bootstrap.sh
+source .venv/bin/activate
 ```
+
+### UV not found
+
+The bootstrap script installs `uv` automatically, but if you need to install it manually:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+## Benefits of UV over pip
+
+- **Speed**: 10-100x faster than pip
+- **Reliability**: Better dependency resolution
+- **Lock files**: Automatic `uv.lock` for reproducible installs
+- **Integration**: Works seamlessly with `pyproject.toml`

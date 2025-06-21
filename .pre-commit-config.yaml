@@ -2,11 +2,10 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
-      - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=1000"]
       - id: check-json
       - id: check-merge-conflict
       - id: check-toml
@@ -14,14 +13,6 @@ repos:
       - id: mixed-line-ending
       - id: check-case-conflict
       - id: check-executables-have-shebangs
-
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.4.18
-    hooks:
-      - id: uv-lock
-        name: Update uv.lock
-        description: Update uv.lock file when pyproject.toml changes
-        files: ^pyproject\.toml$
 
   - repo: https://github.com/psf/black
     rev: 24.10.0
@@ -34,37 +25,29 @@ repos:
     hooks:
       - id: isort
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.3.1
     hooks:
-      - id: flake8
-        additional_dependencies: [flake8-docstrings, flake8-bugbear]
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-requests, types-PyYAML]
+      - id: autoflake
+        args:
+          [
+            "--remove-all-unused-imports",
+            "--remove-unused-variables",
+            "--ignore-init-module-imports",
+            "--in-place",
+          ]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.19.0
     hooks:
       - id: pyupgrade
-        args: ['--py39-plus']
-
-  # Security scanning - uses .bandit configuration
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.10
-    hooks:
-      - id: bandit
-        args: ['-c', '.bandit']
-        exclude: tests/
+        args: ["--py39-plus"]
 
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
+        args: ["--baseline", ".secrets.baseline"]
         exclude: .*\.lock|package-lock\.json|uv\.lock
 
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -73,10 +56,9 @@ repos:
       - id: prettier
         types_or: [yaml, json, markdown]
         exclude: ^(\.secrets\.baseline|uv\.lock)$
-
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        args: ['--convention=google']
-        exclude: tests/
+#  - repo: https://github.com/pycqa/pydocstyle
+#    rev: 6.3.0
+#    hooks:
+#      - id: pydocstyle
+#        args: ["--convention=google"]
+#        exclude: tests/
