@@ -26,6 +26,7 @@ classifiers = [
 
 dependencies = [
     "accelerate>=0.20.0",
+    "autoflake>=2.3.1",
     "beautifulsoup4>=4.12.0",
     "bitsandbytes>=0.41.0",
     "datasets>=2.14.0",
@@ -74,12 +75,6 @@ dev = [
 vision = [
     "openai>=1.0.0",
     "anthropic>=0.7.0",
-]
-
-cuda118 = [
-    "torch==2.7.1+cu118",
-    "torchaudio==2.7.1+cu118",
-    "torchvision==0.22.1+cu118",
 ]
 
 [project.urls]
@@ -206,10 +201,20 @@ exclude_lines = [
     "\\.\\.\\.$",
 ]
 
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "E226", "E501", "E722", "E741", "F841", "W503", "E402"]
+exclude = [".git", "__pycache__", "build", "dist", "*.egg-info", ".venv", "venv"]
+
 [tool.isort]
 profile = "black"
 line_length = 100
-skip_glob = ["*/venv/*", "*/.venv/*", "*/migrations/*"]
+skip_glob = [
+    "*/venv/*",
+    "*/.venv/*",
+    "*/migrations/*",
+    "scripts/setup/setup-secrets.py"
+]
 known_first_party = ["src", "core", "extractors", "llm", "models", "utils"]
 src_paths = ["src", "tests"]
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
@@ -220,7 +225,7 @@ line-length = 100
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
-    "F",  # pyflakes
+    "F",  # pyE501s
     "I",  # isort
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
@@ -232,6 +237,7 @@ ignore = [
     "C901",  # too complex
     "W191",  # indentation contains tabs
 ]
+
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]

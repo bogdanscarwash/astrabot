@@ -5,6 +5,7 @@ Welcome to Astrabot! This tutorial will guide you through setting up Astrabot an
 ## What You'll Learn
 
 By the end of this tutorial, you will:
+
 - Set up Astrabot on your system
 - Extract and process your Signal backup data
 - Analyze your communication patterns
@@ -18,16 +19,19 @@ By the end of this tutorial, you will:
 Before starting, ensure you have:
 
 ### Required
-- **Python 3.8 or higher** ([install guide](https://www.python.org/downloads/))
+
+- **Python 3.9 or higher** ([install guide](https://www.python.org/downloads/))
 - **Signal backup file** (.backup format from Android/iOS)
 - **Signal backup password** (30-digit code shown when creating backup)
 - **At least 8GB RAM** (16GB+ recommended for larger models)
 - **50GB free disk space** for models and data
 
 ### Optional but Recommended
+
 - **NVIDIA GPU** with CUDA support (10x faster training)
 - **OpenAI API key** for image descriptions in conversations
 - **Hugging Face account** for sharing your trained models
+- **just task runner** for simplified commands
 
 ## Step 1: Installation
 
@@ -44,36 +48,51 @@ We recommend using pyenv for Python version management:
 
 ```bash
 # Install Python 3.11 (recommended)
-pyenv install 3.11.7
-pyenv local 3.11.7
+pyenv install 3.11.9
+pyenv local 3.11.9
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Verify Python version
+python --version  # Should show Python 3.11.9
 ```
 
 ### 1.3 Install Astrabot
 
-Install with development dependencies:
+Run the bootstrap script which handles everything automatically:
 
 ```bash
-pip install -e ".[dev]"
+bash scripts/setup/bootstrap.sh
 ```
 
-Or minimal installation:
+This will:
+
+- Check Python version (3.9+ required)
+- Install `uv` package manager (fast alternative to pip)
+- Create virtual environment in `.venv`
+- Install all dependencies from `pyproject.toml`
+- Set up pre-commit hooks
+- Verify the installation
+
+### 1.4 Activate Virtual Environment
 
 ```bash
-pip install -e .
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-### 1.4 Verify Installation
+### 1.5 Install Just (Optional but Recommended)
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin
+```
+
+### 1.6 Verify Installation
 
 ```bash
 # Check installation
 python -c "from src.utils import get_logger; print('Astrabot installed successfully!')"
 
 # Run tests to ensure everything works
-make test-unit
+just test-unit
+# Or without just: pytest -m unit
 ```
 
 ## Step 2: Configuration
@@ -88,7 +107,13 @@ cp .env.example .env
 
 ### 2.2 Configure API Keys
 
-Edit `.env` with your preferred editor:
+You can use the interactive setup script:
+
+```bash
+python scripts/setup/setup-secrets.py
+```
+
+Or manually edit `.env`:
 
 ```bash
 # Core Settings
@@ -113,6 +138,7 @@ python scripts/check-config.py
 ```
 
 Expected output:
+
 ```
 ✓ Environment file loaded
 ✓ Data directories created
@@ -125,12 +151,17 @@ Expected output:
 ### 3.1 Prepare Your Backup File
 
 First, locate your Signal backup:
+
 - **Android**: Usually in `/sdcard/Signal/Backups/` or internal storage
 - **iOS**: Export via Signal Settings → Chats → Chat Backup
 
 ### 3.2 Build the Extraction Tool
 
 ```bash
+# Using just:
+just docker-build
+
+# Or manually:
 cd docker/signalbackup-tools
 docker build -t signalbackup-tools .
 cd ../..
@@ -164,6 +195,7 @@ ls -la data/raw/signal-flatfiles/
 ```
 
 You should see files like:
+
 - `signal.csv` (messages)
 - `recipient.csv` (contacts)
 - `thread.csv` (conversations)
@@ -220,10 +252,12 @@ print(f"Question frequency: {style['question_ratio']:.1%}")
 Start Jupyter and follow the guided notebook:
 
 ```bash
-jupyter notebook notebooks/03_training_pipeline.ipynb
+just notebook
+# Or: jupyter notebook notebooks/03_training_pipeline.ipynb
 ```
 
 The notebook will walk you through:
+
 1. Loading and exploring your data
 2. Filtering conversations
 3. Creating training examples
@@ -243,6 +277,7 @@ python scripts/create-training-data.py \
 ```
 
 Options explained:
+
 - `--min-messages`: Only include conversations with at least N messages
 - `--include-images`: Process image descriptions (requires API key)
 - `--exclude-blocked`: Skip blocked contacts
@@ -282,24 +317,37 @@ Now we'll train a model on your communication style:
 
 ### 6.1 Choose Your Model Size
 
-| Model | VRAM Required | Training Time | Quality |
-|-------|---------------|---------------|---------|
-| Qwen3-3B | 6GB | 30-60 min | Good for basic style |
-| Qwen3-7B | 12GB | 1-2 hours | Balanced performance |
-| Qwen3-14B | 24GB | 2-4 hours | Best quality |
+| Model       | VRAM Required | Training Time | Quality              |
+| ----------- | ------------- | ------------- | -------------------- |
+| Qwen2.5-3B  | 6GB           | 30-60 min     | Good for basic style |
+| Qwen2.5-7B  | 12GB          | 1-2 hours     | Balanced performance |
+| Qwen2.5-14B | 24GB          | 2-4 hours     | Best quality         |
 
 ### 6.2 Start Training
 
+Using just commands:
+
+```bash
+# Standard training
+just train
+
+# Qwen-specific options
+just train-qwen3        # Full training pipeline
+just train-qwen3-small  # Small model for testing
+```
+
 Using the notebook (recommended):
+
 ```bash
 # The notebook handles everything
 jupyter notebook notebooks/03_training_pipeline.ipynb
 ```
 
-Or using the command line:
+Or using the command line directly:
+
 ```bash
 python scripts/train.py \
-    --model "Qwen/Qwen3-7B" \
+    --model "Qwen/Qwen2.5-7B" \
     --data data/processed/training_data.json \
     --output models/my-style \
     --epochs 2 \
@@ -309,6 +357,7 @@ python scripts/train.py \
 ### 6.3 Monitor Training
 
 Watch for:
+
 - **Loss decreasing**: Should drop from ~2.0 to ~0.5
 - **Examples generated**: Check if they match your style
 - **Memory usage**: Reduce batch size if OOM errors
@@ -339,6 +388,7 @@ print(chat("I'm thinking about learning Python"))
 ### 7.2 Evaluation Metrics
 
 Check if your model captures:
+
 - **Message length**: Similar to your average
 - **Emoji usage**: Matches your patterns
 - **Vocabulary**: Uses your common phrases
@@ -357,16 +407,19 @@ python scripts/upload-to-hf.py --model models/my-style --name "my-communication-
 ## What's Next?
 
 ### Immediate Next Steps
+
 1. **Fine-tune further**: Try different hyperparameters
 2. **Test extensively**: Chat with your model in various contexts
 3. **Share safely**: Only share with trusted parties
 
 ### Learn More
+
 - [Advanced Training Techniques](advanced-training.md) - Multi-stage training, style adaptation
 - [Privacy and Security](../explanation/privacy-considerations.md) - Protecting your data
 - [Model Deployment](../how-to/deploy-model.md) - Using your model in applications
 
 ### Get Involved
+
 - Star the repository on GitHub
 - Share your experience (without sharing personal data!)
 - Contribute improvements
@@ -375,28 +428,37 @@ python scripts/upload-to-hf.py --model models/my-style --name "my-communication-
 
 ### Installation Issues
 
-**Problem**: `pip install` fails
+**Problem**: Installation fails
+
 ```bash
-# Solution: Upgrade pip and setuptools
-pip install --upgrade pip setuptools wheel
-pip install -e ".[dev]"
+# Solution: Make sure you're using the bootstrap script
+bash scripts/setup/bootstrap.sh
+
+# If uv isn't found, install it manually:
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 **Problem**: CUDA not detected
+
 ```bash
 # Check CUDA installation
 nvidia-smi
 python -c "import torch; print(torch.cuda.is_available())"
+
+# Install CUDA-specific torch
+uv add torch --extra-index-url https://download.pytorch.org/whl/cu118
 ```
 
 ### Data Processing Issues
 
 **Problem**: Signal backup extraction fails
+
 - Check password is exactly 30 digits
 - Ensure backup file isn't corrupted
 - Try with a newer backup
 
 **Problem**: No conversations found
+
 - Verify YOUR_RECIPIENT_ID is correct (use find-my-id.py)
 - Check CSV files were created in data/raw/signal-flatfiles
 - Ensure you have message history in the backup
@@ -404,6 +466,7 @@ python -c "import torch; print(torch.cuda.is_available())"
 ### Training Issues
 
 **Problem**: Out of memory (OOM)
+
 ```python
 # Reduce batch size
 trainer.batch_size = 2  # or even 1
@@ -412,10 +475,11 @@ trainer.batch_size = 2  # or even 1
 trainer.gradient_accumulation_steps = 4
 
 # Use smaller model
-model_name = "Qwen/Qwen3-3B"  # Instead of 7B or 14B
+model_name = "Qwen/Qwen2.5-3B"  # Instead of 7B or 14B
 ```
 
 **Problem**: Loss not decreasing
+
 - Check training data quality
 - Increase learning rate slightly
 - Train for more epochs

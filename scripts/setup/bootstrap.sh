@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 set -euo pipefail
 
 RED='\033[0;31m'
@@ -31,35 +30,35 @@ command_exists() {
 
 check_python_version() {
     log_info "Checking Python version..."
-    
+
     if ! command_exists python3; then
         log_error "Python 3 is not installed. Please install Python 3.9 or higher."
         exit 1
     fi
-    
+
     python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     required_version="3.9"
-    
+
     if ! python3 -c "import sys; exit(0 if sys.version_info >= (3, 9) else 1)"; then
         log_error "Python ${python_version} is installed, but Python ${required_version}+ is required."
         log_error "Please install Python ${required_version} or higher."
         exit 1
     fi
-    
+
     log_success "Python ${python_version} is installed and meets requirements (>= ${required_version})"
 }
 
 install_uv() {
     log_info "Checking for uv package manager..."
-    
+
     if command_exists uv; then
         uv_version=$(uv --version | cut -d' ' -f2)
         log_success "uv ${uv_version} is already installed"
         return 0
     fi
-    
+
     log_info "Installing uv package manager..."
-    
+
     if command_exists curl; then
         curl -LsSf https://astral.sh/uv/install.sh | sh
     elif command_exists wget; then
@@ -68,13 +67,13 @@ install_uv() {
         log_error "Neither curl nor wget is available. Please install one of them first."
         exit 1
     fi
-    
+
     if [[ -f "$HOME/.bashrc" ]]; then
         source "$HOME/.bashrc"
     fi
-    
+
     export PATH="$HOME/.local/bin:$PATH"
-    
+
     if command_exists uv; then
         uv_version=$(uv --version | cut -d' ' -f2)
         log_success "uv ${uv_version} installed successfully"
@@ -86,19 +85,19 @@ install_uv() {
 
 install_dependencies() {
     log_info "Installing project dependencies with uv..."
-    
+
     if [[ ! -f "pyproject.toml" ]]; then
         log_error "pyproject.toml not found. Are you in the project root directory?"
         exit 1
     fi
-    
+
     if uv sync; then
         log_success "Dependencies installed successfully"
     else
         log_error "Failed to install dependencies"
         exit 1
     fi
-    
+
     if [[ -d ".venv" ]]; then
         log_success "Virtual environment created at .venv"
     else
@@ -108,12 +107,12 @@ install_dependencies() {
 
 setup_precommit() {
     log_info "Setting up pre-commit hooks..."
-    
+
     if [[ ! -f ".pre-commit-config.yaml" ]]; then
         log_warning ".pre-commit-config.yaml not found, skipping pre-commit setup"
         return 0
     fi
-    
+
     if source .venv/bin/activate && pre-commit install; then
         log_success "Pre-commit hooks installed successfully"
     else
@@ -124,19 +123,19 @@ setup_precommit() {
 
 verify_installation() {
     log_info "Verifying installation..."
-    
+
     if [[ -f ".venv/bin/python" ]]; then
         log_success "Virtual environment is properly set up"
     else
         log_error "Virtual environment not found or incomplete"
         exit 1
     fi
-    
+
     source .venv/bin/activate
-    
+
     local tools=("pytest" "black" "flake8" "mypy" "pre-commit")
     local missing_tools=()
-    
+
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
             log_success "$tool is available"
@@ -144,12 +143,12 @@ verify_installation() {
             missing_tools+=("$tool")
         fi
     done
-    
+
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         log_error "Missing development tools: ${missing_tools[*]}"
         exit 1
     fi
-    
+
     log_success "All development tools are properly installed"
 }
 
@@ -182,29 +181,30 @@ print_usage() {
 main() {
     log_info "Starting Astrabot development environment bootstrap..."
     echo
-    
-    cd "$(dirname "${BASH_SOURCE[0]}")/.."
-    
+
+    # Navigate to project root (script is now in scripts/setup/)
+    cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+
     log_info "Working directory: $(pwd)"
     echo
-    
+
     check_python_version
     echo
-    
+
     install_uv
     echo
-    
+
     install_dependencies
     echo
-    
+
     setup_precommit
     echo
-    
+
     verify_installation
     echo
-    
+
     print_usage
-    
+
     log_success "Bootstrap completed successfully! 🎉"
 }
 
